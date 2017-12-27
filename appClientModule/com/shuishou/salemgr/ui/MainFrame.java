@@ -383,6 +383,11 @@ public class MainFrame extends JFrame implements ActionListener{
 		calculatePrice();
 	}
 	
+	public Goods getGoodsByBarcode(String barcode){
+		Goods goods = mapGoods.get(barcode);
+		return goods;
+	}
+	
 	private void calculatePrice(){
 		if (modelGoods.getData() == null || modelGoods.getData().isEmpty()){
 			lbIndentInfo.setText("");
