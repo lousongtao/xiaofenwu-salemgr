@@ -271,22 +271,6 @@ public class CheckoutDialog extends JDialog{
 				}
 			}
 		});
-//		tfMember.getDocument().addDocumentListener(new DocumentListener(){
-//
-//			@Override
-//			public void insertUpdate(DocumentEvent e) {
-//				rbPayMember.setSelected(true);
-//			}
-//
-//			@Override
-//			public void removeUpdate(DocumentEvent e) {
-//				rbPayMember.setSelected(true);
-//			}
-//
-//			@Override
-//			public void changedUpdate(DocumentEvent e) {
-//				rbPayMember.setSelected(true);
-//			}});
 		
 		rbDiscountNon.addItemListener(new ItemListener(){
 			@Override
@@ -360,12 +344,6 @@ public class CheckoutDialog extends JDialog{
 	}
 	
 	public void doPay(){
-//		if (rbPayMember.isSelected()){
-//			if (tfMember.getText() == null || tfMember.getText().length() == 0){
-//				JOptionPane.showMessageDialog(mainFrame, Messages.getString("CheckoutDialog.InputMember")); //$NON-NLS-1$
-//				return;
-//			}
-//		}
 		JSONArray ja = new JSONArray();
 		for (int i = 0; i< choosedGoods.size(); i++) {
 			JSONObject jo = new JSONObject();
@@ -378,6 +356,7 @@ public class CheckoutDialog extends JDialog{
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("userId", mainFrame.getOnDutyUser().getId() + "");
 		params.put("indents", ja.toString());
+		params.put("member", tfMember.getText());
 		params.put("operatetype", ConstantValue.INDENT_OPERATIONTYPE_PAY+"");
 		params.put("paidPrice", discountPrice + "");
 		if (rbPayCash.isSelected()){
@@ -396,13 +375,22 @@ public class CheckoutDialog extends JDialog{
 		JSONObject jsonObj = new JSONObject(response);
 		if (!jsonObj.getBoolean("success")){
 			logger.error("Do checkout failed. URL = " + url + ", param = "+ params);
-			JOptionPane.showMessageDialog(mainFrame, Messages.getString("CheckoutDialog.FailPayMsg")); //$NON-NLS-1$
+			JOptionPane.showMessageDialog(mainFrame, Messages.getString("CheckoutDialog.FailPayMsg") + jsonObj.getString("result")); //$NON-NLS-1$
 		}
 		//clean table
 		mainFrame.clearTable();
 		CheckoutDialog.this.setVisible(false);
 		if (rbPayCash.isSelected()){
 			mainFrame.doOpenCashdrawer(false);
+		}
+		if (rbPayCash.isSelected()){
+			double getcash = 0;
+			if (numGetCash.getText() != null && numGetCash.getText().length() !=0){
+				getcash = Double.parseDouble(numGetCash.getText());
+			}
+			JOptionPane.showMessageDialog(mainFrame, Messages.getString("CheckoutDialog.GetCash") + numGetCash.getText()
+			+ "\n" + Messages.getString("CheckoutDialog.ShouldPayAmount") + String.format(ConstantValue.FORMAT_DOUBLE, discountPrice)
+			+ "\n" + Messages.getString("CheckoutDialog.Charge") + String.format(ConstantValue.FORMAT_DOUBLE, getcash - discountPrice));
 		}
 	}
 	
