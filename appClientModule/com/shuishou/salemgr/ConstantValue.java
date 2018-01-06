@@ -61,6 +61,7 @@ public class ConstantValue {
 	public static final byte INDENT_OPERATIONTYPE_DELETE = 2;
 	public static final byte INDENT_OPERATIONTYPE_CANCEL = 3;
 	public static final byte INDENT_OPERATIONTYPE_PAY = 4;
+	public static final byte INDENT_OPERATIONTYPE_REFUND = 5;
 	
 	//付款方式
 	public static final String INDENT_PAYWAY_CASH = "cash";//现金

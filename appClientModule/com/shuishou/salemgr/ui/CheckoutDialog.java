@@ -357,7 +357,6 @@ public class CheckoutDialog extends JDialog{
 		params.put("userId", mainFrame.getOnDutyUser().getId() + "");
 		params.put("indents", ja.toString());
 		params.put("member", tfMember.getText());
-		params.put("operatetype", ConstantValue.INDENT_OPERATIONTYPE_PAY+"");
 		params.put("paidPrice", discountPrice + "");
 		if (rbPayCash.isSelected()){
 			params.put("payWay", ConstantValue.INDENT_PAYWAY_CASH);

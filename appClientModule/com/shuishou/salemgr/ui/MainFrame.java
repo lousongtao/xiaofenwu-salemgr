@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Timer;
@@ -30,6 +31,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -80,7 +82,7 @@ public class MainFrame extends JFrame implements ActionListener{
 	private JBlockedButton btnOpenCashdrawer = new JBlockedButton(Messages.getString("MainFrame.OpenCashdrawer"), "/resource/cashdrawer.png"); //$NON-NLS-1$
 	private IconButton btnShiftWork = new IconButton(Messages.getString("MainFrame.ShiftWork"), "/resource/swiftwork.png"); //$NON-NLS-1$
 	private IconButton btnRefund = new IconButton(Messages.getString("MainFrame.Refund"), "/resource/refund.png"); //$NON-NLS-1$
-	private NumberTextField tfBarcode = new NumberTextField(this, false, false);
+	private JTextField tfSearch = new JTextField();
 	
 	private ArrayList<DiscountTemplate> discountTemplateList = new ArrayList<>(); 
 	private ArrayList<PayWay> paywayList = new ArrayList<>(); 
@@ -102,19 +104,20 @@ public class MainFrame extends JFrame implements ActionListener{
 	
 	public void initUI(){
 		tableGoods.setModel(modelGoods);
+		tableGoods.setRowHeight(40);
 		tableGoods.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tableGoods.getColumnModel().getColumn(0).setPreferredWidth(200);
 		tableGoods.getColumnModel().getColumn(1).setPreferredWidth(200);
 		tableGoods.getColumnModel().getColumn(2).setPreferredWidth(200);
 		tableGoods.getColumnModel().getColumn(3).setPreferredWidth(200);
-		JScrollPane jspDeskArea = new JScrollPane(tableGoods, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane jspGoods = new JScrollPane(tableGoods, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
-		JLabel lbBarcode = new JLabel(Messages.getString("MainFrame.Barcode"));
+		JLabel lbSearch = new JLabel(Messages.getString("MainFrame.Search"));
 		JPanel pFunction = new JPanel(new GridBagLayout());
 		Insets insets = new Insets(5,5,5,0);
 		int col = 0;
-		pFunction.add(lbBarcode, 		new GridBagConstraints(col++, 0, 1, 1,0,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
-		pFunction.add(tfBarcode, 		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		pFunction.add(lbSearch, 		new GridBagConstraints(col++, 0, 1, 1,0,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		pFunction.add(tfSearch, 		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnCheckout, 		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnChangeAmount, 	new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnDeleteItem, 	new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
@@ -141,17 +144,15 @@ public class MainFrame extends JFrame implements ActionListener{
 		pStatus.add(lbCurrentTime, new GridBagConstraints(2, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,3,0,0),0,0));
 		
 		this.getContentPane().setLayout(new GridBagLayout());
-		this.getContentPane().add(jspDeskArea, 	new GridBagConstraints(0, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+		this.getContentPane().add(jspGoods, 	new GridBagConstraints(0, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 		this.getContentPane().add(pFunction, 	new GridBagConstraints(0, 1, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 		this.getContentPane().add(pStatus, 		new GridBagConstraints(0, 2, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 		
-//		long eventMask = KeyEvent.KEY_EVENT_MASK;
 		BarcodeScannerListener listener = new BarcodeScannerListener();
-//        Toolkit.getDefaultToolkit().addAWTEventListener(listener, eventMask);
-        tfBarcode.addKeyListener(new KeyAdapter(){
+		tfSearch.addKeyListener(new KeyAdapter(){
         	public void keyTyped(KeyEvent e) {
         		if (e.getKeyChar() == KeyEvent.VK_ENTER){
-        			scanAnObject(tfBarcode.getText());
+        			searchAnObjectByValue(tfSearch.getText());
         		}
         	}
         });
@@ -160,34 +161,8 @@ public class MainFrame extends JFrame implements ActionListener{
         btnShiftWork.addKeyListener(listener);
         btnChangeAmount.addKeyListener(listener);
         btnDeleteItem.addKeyListener(listener);
-//        btnMember.addKeyListener(listener);
         btnRefund.addKeyListener(listener);
-        
-//        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {
-//			@Override
-//			public boolean dispatchKeyEvent(KeyEvent e) {
-//				if (e.getID() != KeyEvent.KEY_RELEASED) {
-//					return false;
-//				}
-//				
-//
-//				if (e.getWhen() - lastEventTimeStamp > THRESHOLD) {
-//					barcode.delete(0, barcode.length());
-//				}
-//
-//				lastEventTimeStamp = e.getWhen();
-//
-//				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-//					if (barcode.length() >= MIN_BARCODE_LENGTH) {
-//						scanAnObject(barcode.toString());
-//					}
-//					barcode.delete(0, barcode.length());
-//				} else {
-//					barcode.append(e.getKeyChar());
-//				}
-//				return false;
-//			}
-//		});
+        tableGoods.addKeyListener(listener);
 	}
 	
 	private void initData(){
@@ -368,19 +343,46 @@ public class MainFrame extends JFrame implements ActionListener{
 		calculatePrice();
 	}
 	
-	private void scanAnObject(String barcode){
-		Goods goods = mapGoods.get(barcode);
+	/**
+	 * firstly, look for by barcode; if not find, then look for by name
+	 * @param value
+	 */
+	private void searchAnObjectByValue(String value){
+		Goods goods = mapGoods.get(value);
 		if (goods == null){
-			JOptionPane.showMessageDialog(this, Messages.getString("MainFrame.NoFindByBarcode") + barcode);
-			return;
+			goods = searchAnObjectByName(value);
+			if (goods == null){
+				return;
+			}
 		}
-		tfBarcode.setText("");
+		tfSearch.setText("");
 		ChoosedGoods cg = new ChoosedGoods();
 		cg.amount = 1;
 		cg.goods = goods;
 		modelGoods.addItem(cg);
 		modelGoods.fireTableDataChanged();
 		calculatePrice();
+	}
+	
+	private Goods searchAnObjectByName(String name){
+		ArrayList<Goods> resultlist = new ArrayList<Goods>();
+		Iterator<Goods> it = mapGoods.values().iterator();
+		while(it.hasNext()){
+			Goods g = it.next();
+			if (g.getName().indexOf(name) >= 0){
+				resultlist.add(g);
+			}
+		}
+		if (resultlist.isEmpty()){
+			JOptionPane.showMessageDialog(this, Messages.getString("MainFrame.NoFindByBarcode") + name);
+			return null;
+		}else if (resultlist.size() == 1){
+			return resultlist.get(0);
+		} else {
+			SearchObjectListDialog dlg = new SearchObjectListDialog(this, resultlist, 600, 300);
+			dlg.setVisible(true);
+			return dlg.getChoosedGoods();
+		}
 	}
 	
 	public Goods getGoodsByBarcode(String barcode){
@@ -405,7 +407,7 @@ public class MainFrame extends JFrame implements ActionListener{
 	}
 	
 	public void putFocusOnTFBarcode(){
-		tfBarcode.requestFocusInWindow();
+		tfSearch.requestFocusInWindow();
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -420,7 +422,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		} else if (e.getSource() == btnChangeAmount){
 			doChangeAmount();
 		} else if (e.getSource() == btnRefund){
-			
+			doRefund();
 		} 
 	}
 		
@@ -475,6 +477,14 @@ public class MainFrame extends JFrame implements ActionListener{
 			return;
 		
 		CheckoutDialog dlg = new CheckoutDialog(this, Messages.getString("MainFrame.CheckoutTitle"), true, modelGoods.getData()); //$NON-NLS-1$
+		dlg.setVisible(true);
+	}
+	
+	private void doRefund(){
+		if (modelGoods.getRowCount() == 0)
+			return;
+		
+		RefundDialog dlg = new RefundDialog(this, Messages.getString("MainFrame.Refund"), true, modelGoods.getData()); //$NON-NLS-1$
 		dlg.setVisible(true);
 	}
 	
@@ -578,24 +588,6 @@ public class MainFrame extends JFrame implements ActionListener{
 		f.startLogin(prop.getProperty("defaultuser.name"), prop.getProperty("defaultuser.password"));
 	}
 	
-//	class BarcodeScannerListener implements AWTEventListener{
-//		private String code = "";
-//		@Override
-//		public void eventDispatched(AWTEvent event) {
-//			if (KeyEvent.KEY_PRESSED == event.getID()) {
-//				if (event.getSource() == tfBarcode){
-//					return;
-//				}
-//				if (((KeyEvent)event).getKeyCode() == KeyEvent.VK_ENTER){
-//					scanAnObject(code);
-//					code = "";
-//				} else {
-//					code += ((KeyEvent)event).getKeyChar();
-//				}
-//			}
-//		}
-//	}
-	
 	class BarcodeScannerListener extends KeyAdapter{
 		private long lastEventTimeStamp = 0L;
 		private static final long THRESHOLD = 100;
@@ -612,7 +604,7 @@ public class MainFrame extends JFrame implements ActionListener{
 
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 					if (barcode.length() >= MIN_BARCODE_LENGTH) {
-						scanAnObject(barcode.toString());
+						searchAnObjectByValue(barcode.toString());
 					}
 					e.consume();//must consume the ENTER, otherwise it will invoke the button's click event if it is on focused
 					barcode.delete(0, barcode.length());
