@@ -4,11 +4,13 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 import org.apache.http.HttpEntity;
@@ -39,6 +41,7 @@ import com.shuishou.salemgr.beans.CurrentDutyInfo;
 import com.shuishou.salemgr.beans.DiscountTemplate;
 import com.shuishou.salemgr.beans.Goods;
 import com.shuishou.salemgr.beans.HttpResult;
+import com.shuishou.salemgr.beans.Indent;
 import com.shuishou.salemgr.beans.Member;
 import com.shuishou.salemgr.beans.PayWay;
 import com.shuishou.salemgr.beans.UserData;
@@ -293,5 +296,96 @@ public class HttpUtil {
 			return null;
 		}
 		return result.data;
+	}
+    
+    public static ArrayList<Indent> doQueryPreOrder(MainFrame parent, UserData user, String memberCard, Date startTime, Date endTime){
+		String url = "indent/queryprebuyindent";
+		Map<String, String> params = new HashMap<>();
+		params.put("userId", user.getId() + "");
+		if (memberCard != null && memberCard.length() > 0)
+			params.put("member",memberCard);
+		if (startTime != null){
+			params.put("starttime", ConstantValue.DFYMDHMS.format(startTime));
+		}
+		if (endTime != null){
+			params.put("endtime", ConstantValue.DFYMDHMS.format(endTime));
+		}
+		String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
+		if (response == null){
+			logger.error("get null from server for query preorder. URL = " + url + ", param = "+ params);
+			JOptionPane.showMessageDialog(parent, "get null from server for query preorder. URL = " + url);
+			return null;
+		}
+		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		HttpResult<ArrayList<Indent>> result = gson.fromJson(response, new TypeToken<HttpResult<ArrayList<Indent>>>(){}.getType());
+		if (!result.success){
+			logger.error("return false while query preorder. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, "return false while query preorder. URL = " + url + ", response = "+response);
+			return null;
+		}
+		return result.data;
+	}
+    
+    public static Indent doChangePreOrderToOrder(JDialog parent, UserData user, String indentId){
+		String url = "indent/changepreordertoorder";
+		Map<String, String> params = new HashMap<>();
+		params.put("userId", user.getId() + "");
+		params.put("indentId", indentId);
+		String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
+		if (response == null){
+			logger.error("get null from server for change preorder to order. URL = " + url + ", param = "+ params);
+			JOptionPane.showMessageDialog(parent, "get null from server for change preorder to order. URL = " + url);
+			return null;
+		}
+		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
+		if (!result.success){
+			logger.error("return false while change preorder to order. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, "return false while change preorder to order. URL = " + url + ", response = "+response);
+			return null;
+		}
+		return result.data;
+	}
+    
+    public static boolean doDeletePreOrder(JDialog parent, UserData user, String indentId){
+		String url = "indent/deletepreorder";
+		Map<String, String> params = new HashMap<>();
+		params.put("userId", user.getId() + "");
+		params.put("indentId", indentId);
+		String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
+		if (response == null){
+			logger.error("get null from server for delete preorder. URL = " + url + ", param = "+ params);
+			JOptionPane.showMessageDialog(parent, "get null from server for delete preorder. URL = " + url);
+			return false;
+		}
+		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
+		if (!result.success){
+			logger.error("return false while delete preorder. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, "return false while delete preorder. URL = " + url + ", response = "+response);
+			return false;
+		}
+		return true;
+	}
+    
+    public static Member doLoadMember(JDialog parent, UserData user, String memberCard){
+		String url = "member/querymember";
+		Map<String, String> params = new HashMap<>();
+		params.put("userId", user.getId() + "");
+		params.put("memberCard", memberCard);
+		String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
+		if (response == null){
+			logger.error("get null from server for query member by membercard. URL = " + url + ", param = "+ params);
+			JOptionPane.showMessageDialog(parent, "get null from server for query member by membercard. URL = " + url);
+			return null;
+		}
+		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		HttpResult<ArrayList<Member>> result = gson.fromJson(response, new TypeToken<HttpResult<ArrayList<Member>>>(){}.getType());
+		if (!result.success){
+			logger.error("return false while query member by membercard. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, "return false while query member by membercard. URL = " + url + ", response = "+response);
+			return null;
+		}
+		return result.data.get(0);
 	}
 }

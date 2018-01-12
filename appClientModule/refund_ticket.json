@@ -1,0 +1,180 @@
+{
+	"header": [
+	{
+		"text": "FABULOUS BEAUTY PERTH Pty Ltd",
+		"size": 10,
+		"bold": true,
+		"align": 1,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Northbridge",
+		"size": 10,
+		"bold": true,
+		"align": 1,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Refund",
+		"size": 9,
+		"bold": true,
+		"align": 1,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "ABN：83 607 054 697",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Cashier：{$cashier}",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Refund time：{$dateTime}",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "---------------------------------------",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	}],
+	
+	"goods": [{
+		"name": "Name",
+		"width": 20,
+		"size":9,
+		"bold": false,
+		"variable": "name"
+	},
+	{
+		"name": "Price",
+		"width": 8,
+		"size":9,
+		"bold": false,
+		"variable": "price"
+	},
+	{
+		"name": "Amount",
+		"width": 8,
+		"size":9,
+		"bold": false,
+		"variable": "amount"
+	},
+	{
+		"name": "Total",
+		"width": 5,
+		"size":9,
+		"bold": false,
+		"variable": "totalPrice"
+	}],
+	
+
+	"msg": [{
+		"text": "---------------------------------------",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Total:                    ${$totalPrice}",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Total price include GST:  ${$totalPriceIncludeGST}",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "GST:                      ${$gst}",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Member：{$member}",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "---------------------------------------",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Address: 411 William St, Northbridge, WA",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Add us on Wechat : Fabulousbeauty",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "-",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	
+	{
+		"text": "-",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "-",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	]
+}

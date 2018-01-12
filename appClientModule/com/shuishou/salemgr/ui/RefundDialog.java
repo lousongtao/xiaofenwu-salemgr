@@ -14,6 +14,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +41,8 @@ import com.shuishou.salemgr.beans.DiscountTemplate;
 import com.shuishou.salemgr.beans.Member;
 import com.shuishou.salemgr.beans.PayWay;
 import com.shuishou.salemgr.http.HttpUtil;
+import com.shuishou.salemgr.printertool.PrintJob;
+import com.shuishou.salemgr.printertool.PrintQueue;
 import com.shuishou.salemgr.ui.components.JBlockedButton;
 import com.shuishou.salemgr.ui.components.NumberTextField;
 import com.shuishou.salemgr.ui.uibean.ChoosedGoods;
@@ -58,6 +61,7 @@ public class RefundDialog extends JDialog{
 	private double refundPrice = 0;
 	private double sellPrice = 0;
 	private ArrayList<ChoosedGoods> choosedGoods;
+	private Member member;
 	
 	public RefundDialog(MainFrame mainFrame,String title, boolean modal, ArrayList<ChoosedGoods> choosedGoods){
 		super(mainFrame, title, modal);
@@ -135,17 +139,22 @@ public class RefundDialog extends JDialog{
 					lbMemberInfo.setText("");
 					if (tfMember.getText() == null || tfMember.getText().length() == 0)
 						return;
-					Member m = mainFrame.getMember(tfMember.getText());
-					if (m == null){
+					member = mainFrame.getMember(tfMember.getText());
+					if (member == null){
 						JOptionPane.showMessageDialog(RefundDialog.this, Messages.getString("RefundDialog.NofindMember") + tfMember.getText());
 						return;
+					} else {
+						//reload member data from server
+						member = HttpUtil.doLoadMember(RefundDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
+						//store into local memory
+						mainFrame.getMapMember().put(member.getMemberCard(), member);
+						lbMemberInfo.setText(Messages.getString("RefundDialog.MemberInfo.Name")+ member.getName() + ", " 
+								+ Messages.getString("RefundDialog.MemberInfo.DiscountRate") + member.getDiscountRate() + ", "
+								+ Messages.getString("RefundDialog.MemberInfo.Score") + member.getScore() + ", "
+								+ Messages.getString("RefundDialog.MemberInfo.Balance") + member.getBalanceMoney());
+						refundPrice = sellPrice * member.getDiscountRate();
+						tfRefundPrice.setText(new DecimalFormat("0.00").format(refundPrice)); //$NON-NLS-1$
 					}
-					lbMemberInfo.setText(Messages.getString("RefundDialog.MemberInfo.Name")+ m.getName() + ", " 
-							+ Messages.getString("RefundDialog.MemberInfo.DiscountRate") + m.getDiscountRate() + ", "
-							+ Messages.getString("RefundDialog.MemberInfo.Score") + m.getScore() + ", "
-							+ Messages.getString("RefundDialog.MemberInfo.Balance") + m.getBalanceMoney());
-					refundPrice = sellPrice * m.getDiscountRate();
-					tfRefundPrice.setText(new DecimalFormat("0.00").format(refundPrice)); //$NON-NLS-1$
 				}
 			}
 		});
@@ -165,7 +174,11 @@ public class RefundDialog extends JDialog{
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("userId", mainFrame.getOnDutyUser().getId() + "");
 		params.put("indents", ja.toString());
-		params.put("member", tfMember.getText());
+		if (member != null){
+			params.put("member", member.getMemberCard());
+		}else {
+			params.put("member", "");
+		}
 		params.put("returnToStorage", String.valueOf(rbReturnStorage.isSelected()));
 		params.put("refundPrice", refundPrice + "");
 
@@ -175,10 +188,44 @@ public class RefundDialog extends JDialog{
 			logger.error("Do checkout failed. URL = " + url + ", param = "+ params);
 			JOptionPane.showMessageDialog(mainFrame, Messages.getString("RefundDialog.FailRefundMsg") + jsonObj.getString("result")); //$NON-NLS-1$
 		}
+		doPrintTicket();
 		//clean table
 		mainFrame.clearTable();
 		RefundDialog.this.setVisible(false);
 	}
 	
-	
+	private void doPrintTicket(){
+		Map<String,String> keyMap = new HashMap<String, String>();
+		if (member != null){
+			//reload member data from server
+			member = HttpUtil.doLoadMember(RefundDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
+			//store into local memory
+			mainFrame.getMapMember().put(member.getMemberCard(), member);
+			keyMap.put("member", member.getMemberCard() + "  score : "+ String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
+		}else {
+			keyMap.put("member", "");
+		}
+		keyMap.put("cashier", mainFrame.getOnDutyUser().getName());
+		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(new Date()));
+		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE,refundPrice));
+		
+		keyMap.put("totalPriceIncludeGST", String.format(ConstantValue.FORMAT_DOUBLE,refundPrice));
+		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, refundPrice/11));
+
+		List<Map<String, String>> goods = new ArrayList<>();
+		for (int i = 0; i< choosedGoods.size(); i++) {
+			ChoosedGoods cg = choosedGoods.get(i);
+			Map<String, String> mg = new HashMap<String, String>();
+			mg.put("name", cg.goods.getName());
+			mg.put("price", String.format(ConstantValue.FORMAT_DOUBLE, cg.goods.getSellPrice()));
+			mg.put("amount", cg.amount + "");
+			mg.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE, cg.goods.getSellPrice() * cg.amount));
+			goods.add(mg);
+		}
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("keys", keyMap);
+		params.put("goods", goods);
+		PrintJob job = new PrintJob(ConstantValue.TICKET_TEMPLATE_REFUND, params, mainFrame.printerName);
+		PrintQueue.add(job);
+	}
 }

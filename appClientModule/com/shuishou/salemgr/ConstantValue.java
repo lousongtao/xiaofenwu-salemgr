@@ -96,4 +96,13 @@ public class ConstantValue {
 	public static final String CONFIGS_FIRSTLANGUAGEABBR = "FIRSTLANGUAGEABBR";
 	public static final String CONFIGS_SECONDLANGUAGENAME= "SECONDLANGUAGENAME";
 	public static final String CONFIGS_SECONDLANGUAGEABBR = "SECONDLANGUAGEABBR";
+	
+	public static final String TICKET_TEMPLATE_PURCHASE = "/purchase_ticket.json";
+	public static final String TICKET_TEMPLATE_REFUND = "/refund_ticket.json";
+	public static final String TICKET_TEMPLATE_PREBUY = "/prebuy_ticket.json";
+	
+	public static final byte INDENT_TYPE_ORDER = 1;//普通订单
+	public static final byte INDENT_TYPE_REFUND = 2;//退货单
+	public static final byte INDENT_TYPE_PREBUY_PAID = 3;//预购单已付款
+	public static final byte INDENT_TYPE_PREBUY_UNPAID = 4;//预购单未付款
 }

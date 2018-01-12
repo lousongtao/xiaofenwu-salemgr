@@ -3,6 +3,8 @@ package com.shuishou.salemgr.ui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -12,6 +14,10 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -24,7 +30,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.Timer;
+
+import javax.print.PrintService;
 import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -49,6 +58,7 @@ import com.shuishou.salemgr.beans.Member;
 import com.shuishou.salemgr.beans.PayWay;
 import com.shuishou.salemgr.beans.UserData;
 import com.shuishou.salemgr.http.HttpUtil;
+import com.shuishou.salemgr.printertool.PrintThread;
 import com.shuishou.salemgr.ui.components.IconButton;
 import com.shuishou.salemgr.ui.components.JBlockedButton;
 import com.shuishou.salemgr.ui.components.NumberTextField;
@@ -71,6 +81,7 @@ public class MainFrame extends JFrame implements ActionListener{
 	public static int MEMBER_AMOUNT;
 	private OutputStream outputStreamCashdrawer;
 	public static String portCashdrawer;
+	public static String printerName;
 	
 	private JLabel lbStatusLogin = new JLabel();
 	private JLabel lbIndentInfo = new JLabel();
@@ -82,6 +93,8 @@ public class MainFrame extends JFrame implements ActionListener{
 	private JBlockedButton btnOpenCashdrawer = new JBlockedButton(Messages.getString("MainFrame.OpenCashdrawer"), "/resource/cashdrawer.png"); //$NON-NLS-1$
 	private IconButton btnShiftWork = new IconButton(Messages.getString("MainFrame.ShiftWork"), "/resource/swiftwork.png"); //$NON-NLS-1$
 	private IconButton btnRefund = new IconButton(Messages.getString("MainFrame.Refund"), "/resource/refund.png"); //$NON-NLS-1$
+	private IconButton btnPreOrder = new IconButton(Messages.getString("MainFrame.PreOrder"), "/resource/preorder.png"); //$NON-NLS-1$
+	private JButton btnPreOrderMgr = new JButton(Messages.getString("MainFrame.PreOrderMgr")); //$NON-NLS-1$
 	private JTextField tfSearch = new JTextField();
 	
 	private ArrayList<DiscountTemplate> discountTemplateList = new ArrayList<>(); 
@@ -121,19 +134,22 @@ public class MainFrame extends JFrame implements ActionListener{
 		pFunction.add(btnCheckout, 		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnChangeAmount, 	new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnDeleteItem, 	new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
-//		pFunction.add(btnMember, 		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
-		pFunction.add(btnShiftWork, 	new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
-		pFunction.add(btnOpenCashdrawer,new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
-		pFunction.add(btnRefund,		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
-		pFunction.setPreferredSize(new Dimension(180, 50));
+		pFunction.add(btnRefund, 		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		pFunction.add(btnPreOrder,		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		col = 2;
+		pFunction.add(btnPreOrderMgr,	new GridBagConstraints(col++, 1, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		pFunction.add(btnShiftWork,		new GridBagConstraints(col++, 1, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		pFunction.add(btnOpenCashdrawer,new GridBagConstraints(col++, 1, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		pFunction.setPreferredSize(new Dimension(180, 100));
 		
 		btnCheckout.addActionListener(this);
 		btnOpenCashdrawer.addActionListener(this);
 		btnShiftWork.addActionListener(this);
 		btnChangeAmount.addActionListener(this);
 		btnDeleteItem.addActionListener(this);
-//		btnMember.addActionListener(this);
+		btnPreOrder.addActionListener(this);
 		btnRefund.addActionListener(this);
+		btnPreOrderMgr.addActionListener(this);
 		
 		lbStatusLogin.setBorder(BorderFactory.createLineBorder(Color.gray));
 		lbIndentInfo.setBorder(BorderFactory.createLineBorder(Color.gray));
@@ -145,7 +161,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		
 		this.getContentPane().setLayout(new GridBagLayout());
 		this.getContentPane().add(jspGoods, 	new GridBagConstraints(0, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
-		this.getContentPane().add(pFunction, 	new GridBagConstraints(0, 1, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
+		this.getContentPane().add(pFunction, 	new GridBagConstraints(0, 1, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
 		this.getContentPane().add(pStatus, 		new GridBagConstraints(0, 2, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 		
 		BarcodeScannerListener listener = new BarcodeScannerListener();
@@ -162,7 +178,12 @@ public class MainFrame extends JFrame implements ActionListener{
         btnChangeAmount.addKeyListener(listener);
         btnDeleteItem.addKeyListener(listener);
         btnRefund.addKeyListener(listener);
+        btnPreOrder.addKeyListener(listener);
+        btnPreOrderMgr.addKeyListener(listener);
         tableGoods.addKeyListener(listener);
+        
+        //start printer thread
+        new PrintThread().startThread();
 	}
 	
 	private void initData(){
@@ -243,7 +264,9 @@ public class MainFrame extends JFrame implements ActionListener{
 		}
 	}
 	
-	
+	public void addMember(Member member){
+		mapMember.put(member.getMemberCard(), member);
+	}
 	
 	public HashMap<String, Member> getMapMember() {
 		return mapMember;
@@ -423,10 +446,27 @@ public class MainFrame extends JFrame implements ActionListener{
 			doChangeAmount();
 		} else if (e.getSource() == btnRefund){
 			doRefund();
-		} 
+		} else if (e.getSource() == btnPreOrder){
+			doPreOrder();
+		} else if (e.getSource() == btnPreOrderMgr){
+			doPreOrderMgr();
+		}
 	}
+	
+	private void doPreOrderMgr(){
+		PreorderQueryDialog dlg = new PreorderQueryDialog(this);
+		dlg.setVisible(true);
+	}
+	
+	private void doPreOrder(){
+		if (modelGoods.getRowCount() == 0)
+			return;
 		
-	public void doOpenCashdrawer(boolean needpassword){
+		PreOrderCheckoutDialog dlg = new PreOrderCheckoutDialog(this, Messages.getString("MainFrame.PreOrder"), true, modelGoods.getData()); //$NON-NLS-1$
+		dlg.setVisible(true);
+	}
+	
+	private void doOpenCashdrawer(boolean needpassword){
 		if (needpassword){
 			String code = JOptionPane.showInputDialog(this, Messages.getString("MainFrame.InputCodeOfOpenCashdrawer"));
 			if (code == null)
@@ -437,32 +477,38 @@ public class MainFrame extends JFrame implements ActionListener{
 			}
 		}
 		
-		if (outputStreamCashdrawer == null){
-			Enumeration portList = CommPortIdentifier.getPortIdentifiers();
-			while (portList.hasMoreElements()) {
-				CommPortIdentifier portId = (CommPortIdentifier) portList.nextElement();
-				if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-					if (portId.getName().equals(portCashdrawer)) {
-						try {
-							SerialPort serialPort = (SerialPort) portId.open("SimpleWriteApp", 2000);
-							outputStreamCashdrawer = serialPort.getOutputStream();
-							serialPort.setSerialPortParams(9600, SerialPort.DATABITS_8, SerialPort.STOPBITS_1, SerialPort.PARITY_NONE);
-						} catch (PortInUseException | IOException | UnsupportedCommOperationException e) {
-							logger.error(e);
-						}
-						break;
-					}
-				}
+		PrintService ps = null;
+		for(PrintService service : PrinterJob.lookupPrintServices()){
+			if (service.getName().equals(this.printerName)){
+				ps = service;
+				break;
 			}
 		}
+		if (ps == null){
+			JOptionPane.showMessageDialog(this, "Cannot drive printer by name : " + printerName);
+			return;
+		}
+		
+		PrinterJob pj = PrinterJob.getPrinterJob();
+		
+		pj.setPrintable(new Printable(){
+
+			@Override
+			public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
+				if (pageIndex > 0) {
+					return NO_SUCH_PAGE;
+				}
+				Graphics2D g2d = (Graphics2D) graphics;
+				g2d.drawString("", 0, 0);
+				
+				return PAGE_EXISTS;
+			}});
 		try {
-			if (outputStreamCashdrawer == null){
-				JOptionPane.showMessageDialog(this, Messages.getString("MainFrame.WrongCashdrawerPort"));
-				return;
-			}
-			outputStreamCashdrawer.write("A".getBytes());// any string is ok
-		} catch (IOException e) {
-			logger.error(e);
+			pj.setPrintService(ps);
+			pj.print();
+		} catch (PrinterException e) {
+			JOptionPane.showMessageDialog(this, "Cannot drive printer");
+			logger.error("", e);
 		}
 	}
 	
@@ -528,6 +574,7 @@ public class MainFrame extends JFrame implements ActionListener{
 				e.printStackTrace();
 			}
 		});
+		
 		//load properties
 		Properties prop = new Properties();
 		InputStream input = null;
@@ -573,6 +620,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		MainFrame.portCashdrawer=prop.getProperty("portCashdrawer");
 		MainFrame.GOODS_AMOUNT=Integer.parseInt(prop.getProperty("goods.amount"));
 		MainFrame.MEMBER_AMOUNT = Integer.parseInt(prop.getProperty("member.amount"));
+		MainFrame.printerName = prop.getProperty("printerName");
 		final MainFrame f = new MainFrame();
 		f.setExtendedState(JFrame.MAXIMIZED_BOTH);
 //		f.setUndecorated(true);

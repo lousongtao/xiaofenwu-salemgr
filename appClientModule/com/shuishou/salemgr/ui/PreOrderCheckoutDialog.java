@@ -48,8 +48,8 @@ import com.shuishou.salemgr.ui.components.JBlockedButton;
 import com.shuishou.salemgr.ui.components.NumberTextField;
 import com.shuishou.salemgr.ui.uibean.ChoosedGoods;
 
-public class CheckoutDialog extends JDialog{
-	private final Logger logger = Logger.getLogger(CheckoutDialog.class.getName());
+public class PreOrderCheckoutDialog extends JDialog{
+	private final Logger logger = Logger.getLogger(PreOrderCheckoutDialog.class.getName());
 	private MainFrame mainFrame;
 	
 	private JLabel lbDiscountPrice = new JLabel();
@@ -64,7 +64,7 @@ public class CheckoutDialog extends JDialog{
 	private JTextField tfMember = new JTextField();
 	private JBlockedButton btnPay = new JBlockedButton(Messages.getString("CheckoutDialog.PayButton"), "/resource/checkout.png"); //$NON-NLS-1$
 	private JButton btnClose = new JButton(Messages.getString("CloseDialog")); //$NON-NLS-1$
-	private JButton btnCancelOrder = new JButton(Messages.getString("CheckoutDialog.CancelOrderButton")); //$NON-NLS-1$
+	private JButton btnUnpay = new JButton(Messages.getString("PreOrderCheckoutDialog.UnpayButton")); //$NON-NLS-1$
 	private NumberTextField numGetCash;
 	private JLabel lbCharge;
 	private JLabel lbMemberInfo = new JLabel();
@@ -75,7 +75,7 @@ public class CheckoutDialog extends JDialog{
 	private Member member;
 	
 	private List<DiscountTemplateRadioButton> discountTempRadioButtonList = new ArrayList<DiscountTemplateRadioButton>();
-	public CheckoutDialog(MainFrame mainFrame,String title, boolean modal, ArrayList<ChoosedGoods> choosedGoods){
+	public PreOrderCheckoutDialog(MainFrame mainFrame,String title, boolean modal, ArrayList<ChoosedGoods> choosedGoods){
 		super(mainFrame, title, modal);
 		this.mainFrame = mainFrame;
 		this.choosedGoods = choosedGoods;
@@ -165,10 +165,10 @@ public class CheckoutDialog extends JDialog{
 		JPanel pButton = new JPanel(new GridBagLayout());
 		btnPay.setPreferredSize(new Dimension(150, 50));
 		btnClose.setPreferredSize(new Dimension(150, 50));
-		btnCancelOrder.setPreferredSize(new Dimension(150, 50));
+		btnUnpay.setPreferredSize(new Dimension(150, 50));
 		pButton.add(btnPay,			new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 20, 0, 0), 0, 0));
 		pButton.add(btnClose,		new GridBagConstraints(2, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 20, 0, 0), 0, 0));
-		pButton.add(btnCancelOrder,	new GridBagConstraints(3, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 20, 0, 0), 0, 0));
+		pButton.add(btnUnpay,		new GridBagConstraints(3, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 20, 0, 0), 0, 0));
 		Dimension dPButton = pButton.getPreferredSize();
 		dPButton.height = 60;
 		pButton.setPreferredSize(dPButton);
@@ -212,7 +212,7 @@ public class CheckoutDialog extends JDialog{
 							+ Messages.getString("CheckoutDialog.MemberInfo.DiscountRate") + m.getDiscountRate() + ", "
 							+ Messages.getString("CheckoutDialog.MemberInfo.Score") + m.getScore() + ", "
 							+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + m.getBalanceMoney());
-					discountPrice = Double.parseDouble(String.format(ConstantValue.FORMAT_DOUBLE, sellPrice * m.getDiscountRate()));
+					discountPrice = sellPrice * m.getDiscountRate();
 					lbDiscountPrice.setText(Messages.getString("CheckoutDialog.DiscountPrice") + new DecimalFormat("0.00").format(discountPrice)); //$NON-NLS-1$
 				}
 			}});
@@ -220,22 +220,21 @@ public class CheckoutDialog extends JDialog{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				CheckoutDialog.this.setVisible(false);
+				PreOrderCheckoutDialog.this.setVisible(false);
 			}});
 		
 		btnPay.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				doPay();
+				doMakePreOrder(true);
 			}});
 		
-		btnCancelOrder.addActionListener(new ActionListener(){
+		btnUnpay.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				CheckoutDialog.this.setVisible(false);
-				mainFrame.clearTable();
+				doMakePreOrder(false);
 			}});
 		
 		numGetCash.getDocument().addDocumentListener(new DocumentListener(){
@@ -287,21 +286,15 @@ public class CheckoutDialog extends JDialog{
 						return;
 					member = mainFrame.getMember(tfMember.getText());
 					if (member == null){
-						JOptionPane.showMessageDialog(CheckoutDialog.this, Messages.getString("CheckoutDialog.NofindMember") + tfMember.getText());
+						JOptionPane.showMessageDialog(PreOrderCheckoutDialog.this, Messages.getString("CheckoutDialog.NofindMember") + tfMember.getText());
 						return;
-					} else {
-						//reload member data from server
-						member = HttpUtil.doLoadMember(CheckoutDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
-						//store into local memory
-						mainFrame.getMapMember().put(member.getMemberCard(), member);
-						
-						lbMemberInfo.setText(Messages.getString("CheckoutDialog.MemberInfo.Name")+ member.getName() + ", " 
-								+ Messages.getString("CheckoutDialog.MemberInfo.DiscountRate") + member.getDiscountRate() + ", "
-								+ Messages.getString("CheckoutDialog.MemberInfo.Score") + member.getScore() + ", "
-								+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + member.getBalanceMoney());
-						discountPrice = sellPrice * member.getDiscountRate();
-						lbDiscountPrice.setText(Messages.getString("CheckoutDialog.DiscountPrice") + new DecimalFormat("0.00").format(discountPrice)); //$NON-NLS-1$
 					}
+					lbMemberInfo.setText(Messages.getString("CheckoutDialog.MemberInfo.Name")+ member.getName() + ", " 
+							+ Messages.getString("CheckoutDialog.MemberInfo.DiscountRate") + member.getDiscountRate() + ", "
+							+ Messages.getString("CheckoutDialog.MemberInfo.Score") + member.getScore() + ", "
+							+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + member.getBalanceMoney());
+					discountPrice = sellPrice * member.getDiscountRate();
+					lbDiscountPrice.setText(Messages.getString("CheckoutDialog.DiscountPrice") + new DecimalFormat("0.00").format(discountPrice)); //$NON-NLS-1$
 				}
 			}
 		});
@@ -377,7 +370,7 @@ public class CheckoutDialog extends JDialog{
 		showChargeText();
 	}
 	
-	public void doPay(){
+	public void doMakePreOrder(boolean paid){
 		JSONArray ja = new JSONArray();
 		for (int i = 0; i< choosedGoods.size(); i++) {
 			JSONObject jo = new JSONObject();
@@ -386,43 +379,41 @@ public class CheckoutDialog extends JDialog{
 			jo.put("amount", cg.amount);
 			ja.put(jo);
 		}
-		String url = "indent/makeindent";
+		String url = "indent/prebuyindent";
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("userId", mainFrame.getOnDutyUser().getId() + "");
 		params.put("indents", ja.toString());
-		if (member !=null)
-			params.put("member", member.getMemberCard());
-		else
-			params.put("member", "");
+		params.put("member", tfMember.getText());
 		params.put("paidPrice", discountPrice + "");
-		if (rbPayCash.isSelected()){
+		if (rbPayCash.isSelected()) {
 			params.put("payWay", ConstantValue.INDENT_PAYWAY_CASH);
-		} else if (rbPayBankCard.isSelected()){
+		} else if (rbPayBankCard.isSelected()) {
 			params.put("payWay", ConstantValue.INDENT_PAYWAY_BANKCARD);
 		} else {
-			for(JRadioButton rb : listRBOtherPayway){
-				if (rb.isSelected()){
+			for (JRadioButton rb : listRBOtherPayway) {
+				if (rb.isSelected()) {
 					params.put("payWay", rb.getText());
 					break;
 				}
 			}
 		}
+		params.put("paid", String.valueOf(paid));
+		
 		String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
 		JSONObject jsonObj = new JSONObject(response);
 		if (!jsonObj.getBoolean("success")){
 			logger.error("Do checkout failed. URL = " + url + ", param = "+ params);
 			JOptionPane.showMessageDialog(mainFrame, Messages.getString("CheckoutDialog.FailPayMsg") + jsonObj.getString("result")); //$NON-NLS-1$
-			return;
 		}
 		//print ticket
 		doPrintTicket();
 		//clean table data
 		mainFrame.clearTable();
-		CheckoutDialog.this.setVisible(false);
+		PreOrderCheckoutDialog.this.setVisible(false);
 //		if (rbPayCash.isSelected()){
 //			mainFrame.doOpenCashdrawer(false);
 //		}
-		if (rbPayCash.isSelected()){
+		if (paid && rbPayCash.isSelected()){
 			double getcash = 0;
 			if (numGetCash.getText() != null && numGetCash.getText().length() !=0){
 				getcash = Double.parseDouble(numGetCash.getText());
@@ -433,23 +424,23 @@ public class CheckoutDialog extends JDialog{
 		}
 	}
 	
+	
 	private void doPrintTicket(){
 		Map<String,String> keyMap = new HashMap<String, String>();
 		if (member != null){
 			//reload member data from server
-			member = HttpUtil.doLoadMember(CheckoutDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
+			member = HttpUtil.doLoadMember(PreOrderCheckoutDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
 			//store into local memory
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
-			keyMap.put("member", member.getMemberCard() + "  score : " + String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) 
-				+ "  discount rate: " + (member.getDiscountRate() * 100) + "%");
+			keyMap.put("member", member.getMemberCard() + "  score : "+ String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
 		}else {
 			keyMap.put("member", "");
+			keyMap.put("discount", "");
 		}
 		keyMap.put("cashier", mainFrame.getOnDutyUser().getName());
 		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(new Date()));
-		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE, discountPrice));
-		
-		keyMap.put("totalPriceIncludeGST", String.format(ConstantValue.FORMAT_DOUBLE, discountPrice));
+		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE,discountPrice));
+		keyMap.put("totalPriceIncludeGST", String.format(ConstantValue.FORMAT_DOUBLE,discountPrice));
 		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, discountPrice/11));
 		if (rbPayCash.isSelected()){
 			keyMap.put("payWay", ConstantValue.INDENT_PAYWAY_CASH);
@@ -476,14 +467,10 @@ public class CheckoutDialog extends JDialog{
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("keys", keyMap);
 		params.put("goods", goods);
-		PrintJob job = new PrintJob(ConstantValue.TICKET_TEMPLATE_PURCHASE, params, mainFrame.printerName);
+		PrintJob job = new PrintJob(ConstantValue.TICKET_TEMPLATE_PREBUY, params, mainFrame.printerName);
 		PrintQueue.add(job);
 	}
 	
-	public JButton getBtnCancelOrder() {
-		return btnCancelOrder;
-	}
-
 	class DiscountTemplateRadioButton extends JRadioButton{
 		private DiscountTemplate temp;
 		public DiscountTemplateRadioButton (boolean selected, DiscountTemplate temp) {
