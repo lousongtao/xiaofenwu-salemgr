@@ -14,6 +14,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jfinal.kit.JsonKit;
 import com.shuishou.salemgr.printertool.param.*;
+import com.shuishou.salemgr.ui.MainFrame;
 
 /**
 
@@ -70,6 +71,8 @@ public class DriverPos {
 
         PosTpl posTpl = JSON.parseObject(template, PosTpl.class);
         PrintPager pager = new PrintPager();
+		if (MainFrame.FONT_PRINTTICKET != null && MainFrame.FONT_PRINTTICKET.length() > 0)
+			pager.setFontFamily(MainFrame.FONT_PRINTTICKET);
 		
         List<_PagerBody> bodyList = new ArrayList<_PagerBody>();
 

@@ -14,19 +14,22 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 
+import com.shuishou.salemgr.ConstantValue;
 import com.shuishou.salemgr.Messages;
 import com.shuishou.salemgr.beans.Goods;
+import com.shuishou.salemgr.beans.Member;
 
-public class SearchObjectListDialog extends JDialog{
+public class MemberListDialog extends JDialog{
 
-	private Goods choosedGoods;
+	private Member choosedMember;
 	private JTable table = new JTable();
-	private GoodsTableModel model = new GoodsTableModel();
+	private MemberTableModel model = new MemberTableModel();
 	private MainFrame parent;
 	
-	public SearchObjectListDialog(MainFrame parent, ArrayList<Goods> searchResult, int width, int height){
-		setTitle("Choose Goods");
+	public MemberListDialog(MainFrame parent, ArrayList<Member> searchResult, int width, int height){
+		setTitle("Choose Member");
 		setSize(width, height);
 		this.setModal(true);
 		this.parent = parent;
@@ -34,15 +37,15 @@ public class SearchObjectListDialog extends JDialog{
 		
 	}
 	
-	private void initUI(ArrayList<Goods> searchResult){
+	private void initUI(ArrayList<Member> searchResult){
 		model.setData(searchResult);
 		table.setModel(model);
 		table.setRowHeight(40);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.getColumnModel().getColumn(0).setPreferredWidth(300);
+		table.getColumnModel().getColumn(0).setPreferredWidth(200);
 		table.getColumnModel().getColumn(1).setPreferredWidth(200);
-		table.getColumnModel().getColumn(2).setPreferredWidth(100);
-		table.getColumnModel().getColumn(3).setPreferredWidth(100);
+		table.getColumnModel().getColumn(2).setPreferredWidth(150);
+		table.getColumnModel().getColumn(3).setPreferredWidth(150);
 		JScrollPane jspTable = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		JButton btnConfirm = new JButton("Choose");
 		JButton btnCancel = new JButton("Cancel");
@@ -66,7 +69,7 @@ public class SearchObjectListDialog extends JDialog{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				SearchObjectListDialog.this.setVisible(false);
+				MemberListDialog.this.setVisible(false);
 			}});
 	}
 	
@@ -75,27 +78,22 @@ public class SearchObjectListDialog extends JDialog{
 			JOptionPane.showMessageDialog(this, "No select any record");
 			return;
 		}
-		choosedGoods = ((GoodsTableModel)table.getModel()).getObjectAt(table.getSelectedRow());
+		choosedMember = ((MemberTableModel)table.getModel()).getObjectAt(table.getSelectedRow());
 		this.setVisible(false);
 	}
 	
-	public Goods getChoosedGoods(){
-		return choosedGoods;
+	public Member getChoosedMember(){
+		return choosedMember;
 	}
 	
-	class GoodsTableModel extends AbstractTableModel{
-		private ArrayList<Goods> items = new ArrayList<>();
-		private String[] header = new String[]{
-				Messages.getString("SearchObjectListDialog.Header.Name"),
-				Messages.getString("SearchObjectListDialog.Header.Barcode"),
-				Messages.getString("SearchObjectListDialog.Header.MemberPrice"),
-				Messages.getString("SearchObjectListDialog.Header.SellPrice"),
-		};
+	class MemberTableModel extends DefaultTableModel{
+		private ArrayList<Member> items = new ArrayList<>();
+		private String[] header = new String[]{"Name", "Member Card", "Join Date", "Telephone"};
 
-		public GoodsTableModel(){
+		public MemberTableModel(){
 		}
 		
-		public GoodsTableModel(ArrayList<Goods> items){
+		public MemberTableModel(ArrayList<Member> items){
 			this.items = items;
 		}
 		@Override
@@ -112,16 +110,16 @@ public class SearchObjectListDialog extends JDialog{
 
 		@Override
 		public Object getValueAt(int rowIndex, int columnIndex) {
-			Goods g = getObjectAt(rowIndex);
+			Member m = getObjectAt(rowIndex);
 			switch(columnIndex){
 			case 0:
-				return g.getName();
+				return m.getName();
 			case 1:
-				return g.getBarcode();
+				return m.getMemberCard();
 			case 2:
-				return g.getMemberPrice();
+				return ConstantValue.DFYMD.format(m.getCreateTime());
 			case 3:
-				return g.getSellPrice();
+				return m.getTelephone();
 			}
 			return "";
 		}
@@ -131,15 +129,15 @@ public class SearchObjectListDialog extends JDialog{
 			return header[column];
 	    }
 		
-		public void setData(ArrayList<Goods> items){
+		public void setData(ArrayList<Member> items){
 			this.items = items;
 		}
 		
-		public ArrayList<Goods> getData(){
+		public ArrayList<Member> getData(){
 			return items;
 		}
 		
-		public Goods getObjectAt(int index){
+		public Member getObjectAt(int index){
 			return items.get(index);
 		}
 	}

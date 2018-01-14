@@ -103,23 +103,6 @@
 		"line": true,
 		"type": 0
 	},
-	
-	{
-		"text": "Total price include GST:  ${$totalPriceIncludeGST}",
-		"size": 9,
-		"bold": false,
-		"align": 0,
-		"line": true,
-		"type": 0
-	},
-	{
-		"text": "GST:                      ${$gst}",
-		"size": 9,
-		"bold": false,
-		"align": 0,
-		"line": true,
-		"type": 0
-	},
 	{
 		"text": "Payment Type:             {$payWay}",
 		"size": 9,
@@ -128,13 +111,28 @@
 		"line": true,
 		"type": 0
 	},
-
 	{
-		"text": "Member：{$member}   ",
+		"text": "Cash:                      {$getcash}",
 		"size": 9,
 		"bold": false,
 		"align": 0,
-		"line": false,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Change:                    {$change}",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Member：{$member}",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
 		"type": 0
 	},
 	{

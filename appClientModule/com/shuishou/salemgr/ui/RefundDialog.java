@@ -53,7 +53,6 @@ public class RefundDialog extends JDialog{
 	
 	private JRadioButton rbReturnStorage = new JRadioButton(Messages.getString("RefundDialog.ReturnStorage"), true);
 	private JRadioButton rbNotReturnStorage = new JRadioButton(Messages.getString("RefundDialog.NotReturnStorage"));
-	private JTextField tfMember = new JTextField();
 	private NumberTextField tfRefundPrice = new NumberTextField(this, true, false);
 	private JButton btnRefund = new JButton(Messages.getString("RefundDialog.Refund")); //$NON-NLS-1$
 	private JButton btnClose = new JButton(Messages.getString("CloseDialog")); //$NON-NLS-1$
@@ -63,23 +62,31 @@ public class RefundDialog extends JDialog{
 	private ArrayList<ChoosedGoods> choosedGoods;
 	private Member member;
 	
-	public RefundDialog(MainFrame mainFrame,String title, boolean modal, ArrayList<ChoosedGoods> choosedGoods){
+	public RefundDialog(MainFrame mainFrame,String title, boolean modal, ArrayList<ChoosedGoods> choosedGoods, Member m){
 		super(mainFrame, title, modal);
 		this.mainFrame = mainFrame;
+		this.member = m;
 		this.choosedGoods = choosedGoods;
 		for(ChoosedGoods cg : choosedGoods){
 			sellPrice += cg.amount * cg.goods.getSellPrice(); 
 		}
+		if (member != null)
+			sellPrice *= member.getDiscountRate();
 		refundPrice = sellPrice;
 		initUI();
 	}
 	
 	private void initUI(){
 		tfRefundPrice.setText(new DecimalFormat("0.00").format(refundPrice)); //$NON-NLS-1$
-		JLabel lbMember = new JLabel(Messages.getString("RefundDialog.MemberCard"));
 		JLabel lbPrice = new JLabel();
 		JLabel lbRefundPrice = new JLabel(Messages.getString("RefundDialog.RefundPrice"));
 		lbMemberInfo.setBorder(BorderFactory.createTitledBorder(Messages.getString("RefundDialog.MemberInfo")));
+		if (member != null){
+			lbMemberInfo.setText(Messages.getString("CheckoutDialog.MemberInfo.Name")+ member.getName() + ", " 
+				+ Messages.getString("CheckoutDialog.MemberInfo.DiscountRate") + member.getDiscountRate() + ", "
+				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + member.getScore() + ", "
+				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + member.getBalanceMoney());
+		}
 		
 		JPanel pButton = new JPanel(new GridBagLayout());
 		btnRefund.setPreferredSize(new Dimension(150, 50));
@@ -90,7 +97,6 @@ public class RefundDialog extends JDialog{
 		dPButton.height = 60;
 		pButton.setPreferredSize(dPButton);
 		
-		lbMember.setFont(ConstantValue.FONT_25BOLD);
 		lbPrice.setFont(ConstantValue.FONT_25BOLD);
 		lbPrice.setText(Messages.getString("RefundDialog.Price") + sellPrice); //$NON-NLS-1$
 		
@@ -105,8 +111,6 @@ public class RefundDialog extends JDialog{
 		Container c = this.getContentPane();
 		c.setLayout(new GridBagLayout());
 		c.add(lbPrice, 			new GridBagConstraints(0, 0, 2, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		c.add(lbMember, 		new GridBagConstraints(0, 1, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		c.add(tfMember, 		new GridBagConstraints(1, 1, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 10, 0, 0), 0, 0));
 		c.add(lbMemberInfo,		new GridBagConstraints(0, 2, 2, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		c.add(pReturnStorage,	new GridBagConstraints(0, 3, 2, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		c.add(lbRefundPrice,	new GridBagConstraints(0, 4, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
@@ -131,33 +135,6 @@ public class RefundDialog extends JDialog{
 				doRefund();
 			}});
 		
-		tfMember.addKeyListener(new KeyAdapter(){
-			public void keyPressed(KeyEvent e) {
-				if (e.getID() != KeyEvent.KEY_PRESSED)
-					return;
-				if (e.getKeyCode() == KeyEvent.VK_ENTER){
-					lbMemberInfo.setText("");
-					if (tfMember.getText() == null || tfMember.getText().length() == 0)
-						return;
-					member = mainFrame.getMember(tfMember.getText());
-					if (member == null){
-						JOptionPane.showMessageDialog(RefundDialog.this, Messages.getString("RefundDialog.NofindMember") + tfMember.getText());
-						return;
-					} else {
-						//reload member data from server
-						member = HttpUtil.doLoadMember(RefundDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
-						//store into local memory
-						mainFrame.getMapMember().put(member.getMemberCard(), member);
-						lbMemberInfo.setText(Messages.getString("RefundDialog.MemberInfo.Name")+ member.getName() + ", " 
-								+ Messages.getString("RefundDialog.MemberInfo.DiscountRate") + member.getDiscountRate() + ", "
-								+ Messages.getString("RefundDialog.MemberInfo.Score") + member.getScore() + ", "
-								+ Messages.getString("RefundDialog.MemberInfo.Balance") + member.getBalanceMoney());
-						refundPrice = sellPrice * member.getDiscountRate();
-						tfRefundPrice.setText(new DecimalFormat("0.00").format(refundPrice)); //$NON-NLS-1$
-					}
-				}
-			}
-		});
 	}
 	
 	
@@ -168,6 +145,10 @@ public class RefundDialog extends JDialog{
 			ChoosedGoods cg = choosedGoods.get(i);
 			jo.put("id", cg.goods.getId());
 			jo.put("amount", cg.amount);
+			if (member == null)
+				jo.put("soldPrice", cg.goods.getSellPrice());
+			else 
+				jo.put("soldPrice", String.format(ConstantValue.FORMAT_DOUBLE, cg.goods.getSellPrice() * member.getDiscountRate()));
 			ja.put(jo);
 		}
 		String url = "indent/refundindent";

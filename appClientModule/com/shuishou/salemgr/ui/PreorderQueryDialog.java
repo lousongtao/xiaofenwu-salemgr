@@ -2,6 +2,7 @@ package com.shuishou.salemgr.ui;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -83,11 +84,12 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 		tableIndent.setModel(modelIndent);
 		tableIndent.setRowHeight(40);
 		tableIndent.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tableIndent.getColumnModel().getColumn(0).setPreferredWidth(150);
-		tableIndent.getColumnModel().getColumn(1).setPreferredWidth(80);
+		tableIndent.getColumnModel().getColumn(0).setPreferredWidth(120);
+		tableIndent.getColumnModel().getColumn(1).setPreferredWidth(120);
 		tableIndent.getColumnModel().getColumn(2).setPreferredWidth(120);
 		tableIndent.getColumnModel().getColumn(3).setPreferredWidth(120);
-		tableIndent.getColumnModel().getColumn(4).setPreferredWidth(210);
+		tableIndent.getColumnModel().getColumn(4).setPreferredWidth(120);
+		tableIndent.getColumnModel().getColumn(5).setPreferredWidth(210);
 		JScrollPane jspTableIndent = new JScrollPane(tableIndent, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		tableIndent.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		
@@ -108,10 +110,12 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 		pCondition.add(lbEndDate,	new GridBagConstraints(4, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 0, 0), 0, 0));
 		pCondition.add(dpEndDate,	new GridBagConstraints(5, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 0, 0), 0, 0));
 		pCondition.add(new JLabel(),new GridBagConstraints(6, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10, 10, 0, 0), 0, 0));
-		pCondition.add(btnQuery,	new GridBagConstraints(7, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 0, 0), 0, 0));
-		pCondition.add(btnChangeToOrder,new GridBagConstraints(8, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 0, 0), 0, 0));
-		pCondition.add(btnDelete,	new GridBagConstraints(9, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 0, 0), 0, 0));
-		pCondition.add(btnClose,	new GridBagConstraints(10, 0, 1, 1, 0, 0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 10, 0, 0), 0, 0));
+		JPanel pButton = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		pButton.add(btnQuery);
+		pButton.add(btnChangeToOrder);
+		pButton.add(btnDelete);
+		pButton.add(btnClose);
+		
 		btnQuery.addActionListener(this);
 		btnClose.addActionListener(this);
 		btnDelete.addActionListener(this);
@@ -121,9 +125,11 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 		pTable.add(jspTableIndent,		new GridBagConstraints(0, 0, 1, 1, 3, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(10, 10, 0, 0), 0, 0));
 		pTable.add(jspTableIndentDetail,new GridBagConstraints(1, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(10, 10, 0, 0), 0, 0));
 		
-		setLayout(new BorderLayout());
-		add(pTable, BorderLayout.CENTER);
-		add(pCondition, BorderLayout.NORTH);
+		setLayout(new GridBagLayout());
+		add(pCondition, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(10, 10, 0, 0), 0, 0));
+		add(pButton, 	new GridBagConstraints(0, 1, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(10, 10, 0, 0), 0, 0));
+		add(pTable, 	new GridBagConstraints(0, 2, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(10, 10, 0, 0), 0, 0));
+		
 		
 		tableIndent.getSelectionModel().addListSelectionListener(new ListSelectionListener(){
 
@@ -187,7 +193,7 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 	private void doPrintTicket(Indent indent){
 		Member member = null;
 		if (indent.getMemberCard() != null && indent.getMemberCard().length() > 0){
-			member = mainFrame.getMember(indent.getMemberCard());
+			member = mainFrame.getMemberByMemberCard(indent.getMemberCard());
 			if (member == null){
 				JOptionPane.showMessageDialog(this, "Cannot find member by " + indent.getMemberCard() + ", please restart application.");
 				return;
@@ -259,7 +265,7 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 	
 	class IndentModel extends DefaultTableModel{
 
-		private String[] header = new String[]{"Member Card", "Price", "Paid Price", "Pay Way", "Time", "Status"};
+		private String[] header = new String[]{"Status","Member Card", "Price", "Paid Price", "Pay Way", "Time", };
 		
 		public IndentModel(){
 
@@ -280,20 +286,21 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 			Indent indent = listIndent.get(rowIndex);
 			switch(columnIndex){
 			case 0:
-				return indent.getMemberCard();
-			case 1: 
-				return indent.getTotalPrice();
-			case 2:
-				return indent.getPaidPrice();
-			case 3:
-				return indent.getPayWay();
-			case 4: 
-				return ConstantValue.DFYMDHMS.format(indent.getCreateTime());
-			case 5:
 				if (indent.getIndentType() == ConstantValue.INDENT_TYPE_PREBUY_PAID)
 					return "PAID";
 				else 
 					return "UNPAID";
+			case 1:
+				return indent.getMemberCard();
+			case 2: 
+				return indent.getTotalPrice();
+			case 3:
+				return indent.getPaidPrice();
+			case 4:
+				return indent.getPayWay();
+			case 5: 
+				return ConstantValue.DFYMDHMS.format(indent.getCreateTime());
+			
 			}
 			return "";
 		}

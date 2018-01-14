@@ -4,17 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 
+import com.shuishou.salemgr.ConstantValue;
 import com.shuishou.salemgr.Messages;
+import com.shuishou.salemgr.beans.Member;
 import com.shuishou.salemgr.ui.uibean.ChoosedGoods;
 
-public class GoodsTableModel extends AbstractTableModel{
+public class GoodsTableModel extends DefaultTableModel{
 	private ArrayList<ChoosedGoods> items = new ArrayList<>();
+	private Member member;
 	private String[] header = new String[]{
 			Messages.getString("GoodsTableModel.Header.Name"),
 			Messages.getString("GoodsTableModel.Header.Barcode"),
 			Messages.getString("GoodsTableModel.Header.Amount"),
 			Messages.getString("GoodsTableModel.Header.SellPrice"),
+			Messages.getString("GoodsTableModel.Header.MemberDiscountPrice")
 	};
 
 	public GoodsTableModel(){
@@ -47,6 +52,11 @@ public class GoodsTableModel extends AbstractTableModel{
 			return cg.amount;
 		case 3:
 			return cg.goods.getSellPrice();
+		case 4:
+			if (member != null){
+				return String.format(ConstantValue.FORMAT_DOUBLE, member.getDiscountRate() * cg.goods.getSellPrice());
+			}
+			return "";
 		}
 		return "";
 	}
@@ -93,4 +103,14 @@ public class GoodsTableModel extends AbstractTableModel{
 		return items.get(index);
 	}
 
+	public Member getMember() {
+		return member;
+	}
+
+	public void setMember(Member member) {
+		this.member = member;
+		this.fireTableDataChanged();
+	}
+
+	
 }

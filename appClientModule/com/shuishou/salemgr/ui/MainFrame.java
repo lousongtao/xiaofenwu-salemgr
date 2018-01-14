@@ -1,5 +1,6 @@
 package com.shuishou.salemgr.ui;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -21,6 +22,7 @@ import java.awt.print.PrinterJob;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -79,17 +81,20 @@ public class MainFrame extends JFrame implements ActionListener{
 	public static String SERVER_URL;
 	public static int GOODS_AMOUNT;
 	public static int MEMBER_AMOUNT;
-	private OutputStream outputStreamCashdrawer;
 	public static String portCashdrawer;
 	public static String printerName;
+	public static String FONT_PRINTTICKET;
 	
 	private JLabel lbStatusLogin = new JLabel();
 	private JLabel lbIndentInfo = new JLabel();
 	private JLabel lbCurrentTime = new JLabel();
+	private JLabel lbMemberInfo = new JLabel();
+	private JTextField tfMember = new JTextField();
+	private JButton btnAddMember = new JButton("Add");
+	private JButton btnClearMember = new JButton("Clear");
 	private IconButton btnCheckout = new IconButton(Messages.getString("MainFrame.Checkout"), "/resource/checkout.png"); //$NON-NLS-1$
 	private IconButton btnDeleteItem = new IconButton(Messages.getString("MainFrame.DeleteItem"), "/resource/deleteitem.png"); //$NON-NLS-1$
 	private IconButton btnChangeAmount = new IconButton(Messages.getString("MainFrame.ChangeAmount"), "/resource/changeamount.png"); //$NON-NLS-1$
-//	private IconButton btnMember = new IconButton(Messages.getString("MainFrame.Member"), "/resource/member.png"); //$NON-NLS-1$
 	private JBlockedButton btnOpenCashdrawer = new JBlockedButton(Messages.getString("MainFrame.OpenCashdrawer"), "/resource/cashdrawer.png"); //$NON-NLS-1$
 	private IconButton btnShiftWork = new IconButton(Messages.getString("MainFrame.ShiftWork"), "/resource/swiftwork.png"); //$NON-NLS-1$
 	private IconButton btnRefund = new IconButton(Messages.getString("MainFrame.Refund"), "/resource/refund.png"); //$NON-NLS-1$
@@ -99,13 +104,13 @@ public class MainFrame extends JFrame implements ActionListener{
 	
 	private ArrayList<DiscountTemplate> discountTemplateList = new ArrayList<>(); 
 	private ArrayList<PayWay> paywayList = new ArrayList<>(); 
-//	private ArrayList<Category1> category1List = new ArrayList<>();
 	private UserData onDutyUser = null;//在值班状态用户名称
 	private HashMap<String, String> configsMap;
 	private JTable tableGoods = new JTable();
 	private GoodsTableModel modelGoods = new GoodsTableModel();
 	private HashMap<String, Goods> mapGoods;
 	private HashMap<String, Member> mapMember;
+	private Member member;
 	
 	public MainFrame(){
 		initUI();
@@ -121,37 +126,47 @@ public class MainFrame extends JFrame implements ActionListener{
 		tableGoods.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tableGoods.getColumnModel().getColumn(0).setPreferredWidth(200);
 		tableGoods.getColumnModel().getColumn(1).setPreferredWidth(200);
-		tableGoods.getColumnModel().getColumn(2).setPreferredWidth(200);
-		tableGoods.getColumnModel().getColumn(3).setPreferredWidth(200);
+		tableGoods.getColumnModel().getColumn(2).setPreferredWidth(100);
+		tableGoods.getColumnModel().getColumn(3).setPreferredWidth(150);
+		tableGoods.getColumnModel().getColumn(3).setPreferredWidth(150);
 		JScrollPane jspGoods = new JScrollPane(tableGoods, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
 		JLabel lbSearch = new JLabel(Messages.getString("MainFrame.Search"));
-		JPanel pFunction = new JPanel(new GridBagLayout());
+		JPanel pSearch = new JPanel(new BorderLayout());
+		pSearch.add(lbSearch, BorderLayout.WEST);
+		pSearch.add(tfSearch, BorderLayout.CENTER);
 		Insets insets = new Insets(5,5,5,0);
+		
+		JPanel pMember = new JPanel(new GridBagLayout());
+		JLabel lbMember = new JLabel(Messages.getString("MainFrame.Member"));
+		tfMember.setPreferredSize(new Dimension(150, 35));
+		pMember.add(lbMember, 			new GridBagConstraints(0, 0, 1, 1,0,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0,0,0,0),0,0));
+		pMember.add(tfMember, 			new GridBagConstraints(1, 0, 1, 1,0.3,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		pMember.add(btnAddMember, 		new GridBagConstraints(2, 0, 1, 1,0,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		pMember.add(btnClearMember, 	new GridBagConstraints(3, 0, 1, 1,0,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		pMember.add(lbMemberInfo, 		new GridBagConstraints(4, 0, 1, 1,0.7,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		
+		JPanel pFunction = new JPanel(new GridBagLayout());
+		
 		int col = 0;
-		pFunction.add(lbSearch, 		new GridBagConstraints(col++, 0, 1, 1,0,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
-		pFunction.add(tfSearch, 		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		pFunction.add(pSearch, 			new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnCheckout, 		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnChangeAmount, 	new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnDeleteItem, 	new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnRefund, 		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
-		pFunction.add(btnPreOrder,		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
-		col = 2;
+		col = 1;
+		pFunction.add(btnPreOrder,		new GridBagConstraints(col++, 1, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnPreOrderMgr,	new GridBagConstraints(col++, 1, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnShiftWork,		new GridBagConstraints(col++, 1, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnOpenCashdrawer,new GridBagConstraints(col++, 1, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
-		pFunction.setPreferredSize(new Dimension(180, 100));
 		
-		btnCheckout.addActionListener(this);
-		btnOpenCashdrawer.addActionListener(this);
-		btnShiftWork.addActionListener(this);
-		btnChangeAmount.addActionListener(this);
-		btnDeleteItem.addActionListener(this);
-		btnPreOrder.addActionListener(this);
-		btnRefund.addActionListener(this);
-		btnPreOrderMgr.addActionListener(this);
+		pFunction.add(pMember,			new GridBagConstraints(0, 2, 5, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
+		pFunction.setPreferredSize(new Dimension(180, 150));
+		
+		
 		
 		lbStatusLogin.setBorder(BorderFactory.createLineBorder(Color.gray));
+		lbStatusLogin.setPreferredSize(new Dimension(350, (int)lbStatusLogin.getPreferredSize().getHeight()));
 		lbIndentInfo.setBorder(BorderFactory.createLineBorder(Color.gray));
 		lbCurrentTime.setBorder(BorderFactory.createLineBorder(Color.gray));
 		JPanel pStatus = new JPanel(new GridBagLayout());
@@ -172,6 +187,17 @@ public class MainFrame extends JFrame implements ActionListener{
         		}
         	}
         });
+		btnCheckout.addActionListener(this);
+		btnOpenCashdrawer.addActionListener(this);
+		btnShiftWork.addActionListener(this);
+		btnChangeAmount.addActionListener(this);
+		btnDeleteItem.addActionListener(this);
+		btnPreOrder.addActionListener(this);
+		btnRefund.addActionListener(this);
+		btnPreOrderMgr.addActionListener(this);
+		btnAddMember.addActionListener(this);
+		btnClearMember.addActionListener(this);
+		
         btnCheckout.addKeyListener(listener);
         btnOpenCashdrawer.addKeyListener(listener);
         btnShiftWork.addKeyListener(listener);
@@ -181,6 +207,19 @@ public class MainFrame extends JFrame implements ActionListener{
         btnPreOrder.addKeyListener(listener);
         btnPreOrderMgr.addKeyListener(listener);
         tableGoods.addKeyListener(listener);
+        btnAddMember.addKeyListener(listener);
+        btnClearMember.addKeyListener(listener);
+        
+        tfMember.addKeyListener(new KeyAdapter(){
+			public void keyPressed(KeyEvent e) {
+				if (e.getID() != KeyEvent.KEY_PRESSED)
+					return;
+				if (e.getKeyCode() == KeyEvent.VK_ENTER){
+					doLookforMember();
+					tfSearch.requestFocusInWindow();
+				}
+			}
+		});
         
         //start printer thread
         new PrintThread().startThread();
@@ -272,8 +311,29 @@ public class MainFrame extends JFrame implements ActionListener{
 		return mapMember;
 	}
 	
-	public Member getMember(String memberCode){
+	public Member getMemberByMemberCard(String memberCode){
 		return mapMember.get(memberCode);
+	}
+	
+	/**
+	 * Hazily look for member, 
+	 * @param key , can match name, membercard, phone number
+	 * @return
+	 */
+	public ArrayList<Member> getMemberHazily(String key){
+		ArrayList<Member> ms = new ArrayList<>();
+		Iterator<Member> it = mapMember.values().iterator();
+		while(it.hasNext()){
+			Member m = it.next();
+			if (m.getName().toLowerCase().indexOf(key) >= 0){
+				ms.add(m);
+			} else if (m.getMemberCard().indexOf(key) >= 0){
+				ms.add(m);
+			} else if (m.getTelephone() != null && m.getTelephone().indexOf(key) >= 0){
+				ms.add(m);
+			}
+		}
+		return ms;
 	}
 
 	private void loadConfigsMap(){
@@ -349,6 +409,48 @@ public class MainFrame extends JFrame implements ActionListener{
 		modelGoods.fireTableDataChanged();
 		calculatePrice();
 	}
+
+	private void doLookforMember(){
+		lbMemberInfo.setText("");
+		member = null;
+		if (tfMember.getText() == null || tfMember.getText().length() == 0)
+			return;
+		ArrayList<Member> ms = getMemberHazily(tfMember.getText());
+		if (ms == null || ms.isEmpty()){
+			
+			JOptionPane.showMessageDialog(MainFrame.this, Messages.getString("CheckoutDialog.NofindMember") + tfMember.getText());
+			return;
+		} else if (ms.size() == 1){
+			member = ms.get(0);
+		} else {
+			MemberListDialog dlg = new MemberListDialog(this, ms, 800, 400);
+			dlg.setVisible(true);
+			member = dlg.getChoosedMember();
+		}
+		if (member != null){
+			//reload member data from server
+			member = HttpUtil.doLoadMember(MainFrame.this, getOnDutyUser(), member.getMemberCard());
+			//store into local memory
+			mapMember.put(member.getMemberCard(), member);
+			
+			modelGoods.setMember(member);
+			calculatePrice();
+		}
+		showMemberInfo(member);
+	}
+	
+	private void showMemberInfo(Member m){
+		if (m == null){
+			tfMember.setText("");
+			lbMemberInfo.setText("");
+		} else {
+			tfMember.setText(m.getName());
+			lbMemberInfo.setText(Messages.getString("CheckoutDialog.MemberInfo.Name")+ m.getName() + ", " 
+				+ Messages.getString("CheckoutDialog.MemberInfo.DiscountRate") + m.getDiscountRate() + ", "
+				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + m.getScore() + ", "
+				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + m.getBalanceMoney());
+		}
+	}
 	
 	private void doChangeAmount(){
 		int row = tableGoods.getSelectedRow();
@@ -402,7 +504,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		}else if (resultlist.size() == 1){
 			return resultlist.get(0);
 		} else {
-			SearchObjectListDialog dlg = new SearchObjectListDialog(this, resultlist, 600, 300);
+			SearchObjectListDialog dlg = new SearchObjectListDialog(this, resultlist, 1000, 800);
 			dlg.setVisible(true);
 			return dlg.getChoosedGoods();
 		}
@@ -423,6 +525,9 @@ public class MainFrame extends JFrame implements ActionListener{
 		for(ChoosedGoods cg : modelGoods.getData()){
 			itemamount += cg.amount;
 			price += cg.amount * cg.goods.getSellPrice();
+		}
+		if (member != null){
+			price *= member.getDiscountRate();
 		}
 		lbIndentInfo.setText(Messages.getString("MainFrame.lbIndentInfo.typeamount") + modelGoods.getRowCount()+ "  "
 				+ Messages.getString("MainFrame.lbIndentInfo.itemamount") + itemamount + "  "
@@ -450,6 +555,20 @@ public class MainFrame extends JFrame implements ActionListener{
 			doPreOrder();
 		} else if (e.getSource() == btnPreOrderMgr){
 			doPreOrderMgr();
+		} else if (e.getSource() == btnAddMember){
+			MemberDialog dlg = new MemberDialog(this);
+			dlg.setVisible(true);
+			member = dlg.getMember();
+			if (member != null){
+				showMemberInfo(member);
+				modelGoods.setMember(member);
+				calculatePrice();
+			}
+		} else if (e.getSource() == btnClearMember){
+			member = null;
+			showMemberInfo(null);
+			modelGoods.setMember(null);
+			calculatePrice();
 		}
 	}
 	
@@ -462,7 +581,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		if (modelGoods.getRowCount() == 0)
 			return;
 		
-		PreOrderCheckoutDialog dlg = new PreOrderCheckoutDialog(this, Messages.getString("MainFrame.PreOrder"), true, modelGoods.getData()); //$NON-NLS-1$
+		PreOrderCheckoutDialog dlg = new PreOrderCheckoutDialog(this, Messages.getString("MainFrame.PreOrder"), true, modelGoods.getData(), member); //$NON-NLS-1$
 		dlg.setVisible(true);
 	}
 	
@@ -516,21 +635,24 @@ public class MainFrame extends JFrame implements ActionListener{
 		modelGoods.deleteAllItem();
 		modelGoods.fireTableDataChanged();
 		calculatePrice();
+		member = null;
+		showMemberInfo(null);
 	}
 	
 	private void doCheckout(){
 		if (modelGoods.getRowCount() == 0)
 			return;
 		
-		CheckoutDialog dlg = new CheckoutDialog(this, Messages.getString("MainFrame.CheckoutTitle"), true, modelGoods.getData()); //$NON-NLS-1$
+		CheckoutDialog dlg = new CheckoutDialog(this, Messages.getString("MainFrame.CheckoutTitle"), true, modelGoods.getData(), member); //$NON-NLS-1$
 		dlg.setVisible(true);
+		
 	}
 	
 	private void doRefund(){
 		if (modelGoods.getRowCount() == 0)
 			return;
 		
-		RefundDialog dlg = new RefundDialog(this, Messages.getString("MainFrame.Refund"), true, modelGoods.getData()); //$NON-NLS-1$
+		RefundDialog dlg = new RefundDialog(this, Messages.getString("MainFrame.Refund"), true, modelGoods.getData(), member); //$NON-NLS-1$
 		dlg.setVisible(true);
 	}
 	
@@ -621,8 +743,10 @@ public class MainFrame extends JFrame implements ActionListener{
 		MainFrame.GOODS_AMOUNT=Integer.parseInt(prop.getProperty("goods.amount"));
 		MainFrame.MEMBER_AMOUNT = Integer.parseInt(prop.getProperty("member.amount"));
 		MainFrame.printerName = prop.getProperty("printerName");
+		MainFrame.FONT_PRINTTICKET = prop.getProperty("printFont");
 		final MainFrame f = new MainFrame();
-		f.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		f.setSize(MainFrame.WINDOW_WIDTH, MainFrame.WINDOW_HEIGHT);
+//		f.setExtendedState(JFrame.MAXIMIZED_BOTH);
 //		f.setUndecorated(true);
 		f.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		f.addWindowListener(new WindowAdapter(){

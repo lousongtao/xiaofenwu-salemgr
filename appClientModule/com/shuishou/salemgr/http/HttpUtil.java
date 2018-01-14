@@ -1,5 +1,6 @@
 package com.shuishou.salemgr.http;
 
+import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.text.ParseException;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import org.apache.http.HttpEntity;
@@ -368,7 +370,7 @@ public class HttpUtil {
 		return true;
 	}
     
-    public static Member doLoadMember(JDialog parent, UserData user, String memberCard){
+    public static Member doLoadMember(Window parent, UserData user, String memberCard){
 		String url = "member/querymember";
 		Map<String, String> params = new HashMap<>();
 		params.put("userId", user.getId() + "");

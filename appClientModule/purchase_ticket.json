@@ -17,7 +17,7 @@
 		"type": 0
 	},
 	{
-		"text": "Invoice",
+		"text": "Tax Invoice",
 		"size": 9,
 		"bold": true,
 		"align": 1,
@@ -104,14 +104,7 @@
 		"line": true,
 		"type": 0
 	},
-	{
-		"text": "Total price include GST:  ${$totalPriceIncludeGST}",
-		"size": 9,
-		"bold": false,
-		"align": 0,
-		"line": true,
-		"type": 0
-	},
+	
 	{
 		"text": "GST:                      ${$gst}",
 		"size": 9,
@@ -122,6 +115,22 @@
 	},
 	{
 		"text": "Payment Type:             {$payWay}",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Cash:                      {$getcash}",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "Change:                    {$change}",
 		"size": 9,
 		"bold": false,
 		"align": 0,
@@ -295,6 +304,6 @@
 		"align": 0,
 		"line": true,
 		"type": 0
-	},
+	}
 	]
 }
