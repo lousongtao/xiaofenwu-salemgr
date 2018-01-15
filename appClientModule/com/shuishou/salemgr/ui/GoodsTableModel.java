@@ -112,5 +112,7 @@ public class GoodsTableModel extends DefaultTableModel{
 		this.fireTableDataChanged();
 	}
 
-	
+	public boolean isCellEditable(int row, int column) {
+        return false;
+    }
 }

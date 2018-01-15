@@ -318,9 +318,13 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 			if (listIndent != null && row >=0 && row < listIndent.size())
 				listIndent.remove(row);
 		}
+		
+		public boolean isCellEditable(int row, int column) {
+        return false;
+    }
 	}
 
-	class IndentDetailModel extends AbstractTableModel{
+	class IndentDetailModel extends DefaultTableModel{
 
 		private String[] header = new String[]{"Name", "Amount", "Price"};
 		private ArrayList<IndentDetail> details = new ArrayList<>();
@@ -367,5 +371,9 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 		public void clearData(){
 			details.clear();
 		}
+		
+		public boolean isCellEditable(int row, int column) {
+        return false;
+    }
 	}
 }

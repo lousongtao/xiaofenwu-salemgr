@@ -140,5 +140,9 @@ public class MemberListDialog extends JDialog{
 		public Member getObjectAt(int index){
 			return items.get(index);
 		}
+		
+		public boolean isCellEditable(int row, int column) {
+        return false;
+    }
 	}
 }
