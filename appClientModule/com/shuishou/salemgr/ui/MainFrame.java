@@ -13,6 +13,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.print.PageFormat;
@@ -38,8 +40,10 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -90,6 +94,7 @@ public class MainFrame extends JFrame implements ActionListener{
 	private JLabel lbCurrentTime = new JLabel();
 	private JLabel lbMemberInfo = new JLabel();
 	private JTextField tfMember = new JTextField();
+	private JTextField tfSearchGoods = new JTextField();
 	private JButton btnAddMember = new JButton("Add");
 	private JButton btnClearMember = new JButton("Clear");
 	private IconButton btnCheckout = new IconButton(Messages.getString("MainFrame.Checkout"), "/resource/checkout.png"); //$NON-NLS-1$
@@ -100,7 +105,10 @@ public class MainFrame extends JFrame implements ActionListener{
 	private IconButton btnRefund = new IconButton(Messages.getString("MainFrame.Refund"), "/resource/refund.png"); //$NON-NLS-1$
 	private IconButton btnPreOrder = new IconButton(Messages.getString("MainFrame.PreOrder"), "/resource/preorder.png"); //$NON-NLS-1$
 	private JButton btnPreOrderMgr = new JButton(Messages.getString("MainFrame.PreOrderMgr")); //$NON-NLS-1$
-	private JTextField tfSearch = new JTextField();
+	private JPopupMenu popupMenu = new JPopupMenu();
+	private JMenuItem miDeleteItem = new JMenuItem("Delete this");
+	private JMenuItem miDeleteAllItem = new JMenuItem("Delete all");
+	private JMenuItem miChangePrice = new JMenuItem("Change Price");
 	
 	private ArrayList<DiscountTemplate> discountTemplateList = new ArrayList<>(); 
 	private ArrayList<PayWay> paywayList = new ArrayList<>(); 
@@ -124,17 +132,37 @@ public class MainFrame extends JFrame implements ActionListener{
 		tableGoods.setModel(modelGoods);
 		tableGoods.setRowHeight(40);
 		tableGoods.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tableGoods.getColumnModel().getColumn(0).setPreferredWidth(200);
-		tableGoods.getColumnModel().getColumn(1).setPreferredWidth(200);
-		tableGoods.getColumnModel().getColumn(2).setPreferredWidth(100);
-		tableGoods.getColumnModel().getColumn(3).setPreferredWidth(150);
-		tableGoods.getColumnModel().getColumn(3).setPreferredWidth(150);
+		tableGoods.getColumnModel().getColumn(0).setPreferredWidth(200);//name
+		tableGoods.getColumnModel().getColumn(1).setPreferredWidth(200);//barcode
+		tableGoods.getColumnModel().getColumn(2).setPreferredWidth(50);//amount
+		tableGoods.getColumnModel().getColumn(3).setPreferredWidth(50);//sell price
+		tableGoods.getColumnModel().getColumn(4).setPreferredWidth(50);//member discount price
+		tableGoods.getColumnModel().getColumn(5).setPreferredWidth(50);//modified price
 		JScrollPane jspGoods = new JScrollPane(tableGoods, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		popupMenu.add(miDeleteItem);
+		popupMenu.add(miDeleteAllItem);
+		popupMenu.addSeparator();
+		popupMenu.add(miChangePrice);
+//		tableGoods.setComponentPopupMenu(popupMenu);
+		tableGoods.addMouseListener(new MouseAdapter(){
+			public void mouseReleased(MouseEvent e){
+                if (e.isPopupTrigger()){
+                    JTable source = (JTable)e.getSource();
+                    int row = source.rowAtPoint( e.getPoint() );
+                    int column = source.columnAtPoint( e.getPoint() );
+
+                    if (! source.isRowSelected(row))
+                        source.changeSelection(row, column, false, false);
+
+                    popupMenu.show(e.getComponent(), e.getX(), e.getY());
+                }
+            }
+		});
 		
 		JLabel lbSearch = new JLabel(Messages.getString("MainFrame.Search"));
 		JPanel pSearch = new JPanel(new BorderLayout());
 		pSearch.add(lbSearch, BorderLayout.WEST);
-		pSearch.add(tfSearch, BorderLayout.CENTER);
+		pSearch.add(tfSearchGoods, BorderLayout.CENTER);
 		Insets insets = new Insets(5,5,5,0);
 		
 		JPanel pMember = new JPanel(new GridBagLayout());
@@ -154,7 +182,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		pFunction.add(btnChangeAmount, 	new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnDeleteItem, 	new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnRefund, 		new GridBagConstraints(col++, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
-		col = 1;
+		col = 0;
 		pFunction.add(btnPreOrder,		new GridBagConstraints(col++, 1, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnPreOrderMgr,	new GridBagConstraints(col++, 1, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
 		pFunction.add(btnShiftWork,		new GridBagConstraints(col++, 1, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.BOTH, insets,0,0));
@@ -180,13 +208,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		this.getContentPane().add(pStatus, 		new GridBagConstraints(0, 2, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0,0,0,0),0,0));
 		
 		BarcodeScannerListener listener = new BarcodeScannerListener();
-		tfSearch.addKeyListener(new KeyAdapter(){
-        	public void keyTyped(KeyEvent e) {
-        		if (e.getKeyChar() == KeyEvent.VK_ENTER){
-        			searchAnObjectByValue(tfSearch.getText());
-        		}
-        	}
-        });
+		
 		btnCheckout.addActionListener(this);
 		btnOpenCashdrawer.addActionListener(this);
 		btnShiftWork.addActionListener(this);
@@ -197,6 +219,9 @@ public class MainFrame extends JFrame implements ActionListener{
 		btnPreOrderMgr.addActionListener(this);
 		btnAddMember.addActionListener(this);
 		btnClearMember.addActionListener(this);
+		miDeleteAllItem.addActionListener(this);
+		miDeleteItem.addActionListener(this);
+		miChangePrice.addActionListener(this);
 		
         btnCheckout.addKeyListener(listener);
         btnOpenCashdrawer.addKeyListener(listener);
@@ -210,13 +235,22 @@ public class MainFrame extends JFrame implements ActionListener{
         btnAddMember.addKeyListener(listener);
         btnClearMember.addKeyListener(listener);
         
+        tfSearchGoods.addKeyListener(new KeyAdapter(){
+        	public void keyTyped(KeyEvent e) {
+        		if (e.getKeyChar() == KeyEvent.VK_ENTER){
+        			searchAnObjectByValue(tfSearchGoods.getText());
+        			tfSearchGoods.setText("");
+        		}
+        	}
+        });
+        
         tfMember.addKeyListener(new KeyAdapter(){
 			public void keyPressed(KeyEvent e) {
 				if (e.getID() != KeyEvent.KEY_PRESSED)
 					return;
 				if (e.getKeyCode() == KeyEvent.VK_ENTER){
 					doLookforMember();
-					tfSearch.requestFocusInWindow();
+					tfSearchGoods.requestFocusInWindow();
 				}
 			}
 		});
@@ -325,9 +359,9 @@ public class MainFrame extends JFrame implements ActionListener{
 		Iterator<Member> it = mapMember.values().iterator();
 		while(it.hasNext()){
 			Member m = it.next();
-			if (m.getName().toLowerCase().indexOf(key) >= 0){
+			if (m.getName().toLowerCase().indexOf(key.toLowerCase()) >= 0){
 				ms.add(m);
-			} else if (m.getMemberCard().indexOf(key) >= 0){
+			} else if (m.getMemberCard().indexOf(key.toLowerCase()) >= 0){
 				ms.add(m);
 			} else if (m.getTelephone() != null && m.getTelephone().indexOf(key) >= 0){
 				ms.add(m);
@@ -400,12 +434,31 @@ public class MainFrame extends JFrame implements ActionListener{
 		return onDutyUser;
 	}
 
+	private void doChangePrice(){
+		int row = tableGoods.getSelectedRow();
+		if (row < 0)
+			return;
+		ChoosedGoods cg = modelGoods.getObjectAt(row);
+		ChangeGoodsPriceDialog dlg = new ChangeGoodsPriceDialog(this, cg.goods);
+		dlg.setVisible(true);
+		if (!dlg.isCancel()){
+			cg.modifiedPrice = dlg.getModifiedPrice();
+			modelGoods.fireTableDataChanged();
+		}
+	}
+	
 	private void doDeleteItem(){
 		int row = tableGoods.getSelectedRow();
 		if (row < 0){
 			return;
 		}
 		modelGoods.deleteItem(row);
+		modelGoods.fireTableDataChanged();
+		calculatePrice();
+	}
+	
+	private void doDeleteAllItem(){
+		modelGoods.deleteAllItem();
 		modelGoods.fireTableDataChanged();
 		calculatePrice();
 	}
@@ -423,7 +476,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		} else if (ms.size() == 1){
 			member = ms.get(0);
 		} else {
-			MemberListDialog dlg = new MemberListDialog(this, ms, 800, 400);
+			MemberListDialog dlg = new MemberListDialog(this, ms, 1000, 600);
 			dlg.setVisible(true);
 			member = dlg.getChoosedMember();
 		}
@@ -447,8 +500,8 @@ public class MainFrame extends JFrame implements ActionListener{
 			tfMember.setText(m.getName());
 			lbMemberInfo.setText(Messages.getString("CheckoutDialog.MemberInfo.Name")+ m.getName() + ", " 
 				+ Messages.getString("CheckoutDialog.MemberInfo.DiscountRate") + m.getDiscountRate() + ", "
-				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + m.getScore() + ", "
-				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + m.getBalanceMoney());
+				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + String.format(ConstantValue.FORMAT_DOUBLE, m.getScore()) + ", "
+				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + String.format(ConstantValue.FORMAT_DOUBLE, m.getBalanceMoney()));
 		}
 	}
 	
@@ -469,18 +522,26 @@ public class MainFrame extends JFrame implements ActionListener{
 	}
 	
 	/**
-	 * firstly, look for by barcode; if not find, then look for by name
+	 * firstly, look for by barcode; if not find, then look for by name; if both failed, then look for from server by barcode
 	 * @param value
 	 */
 	private void searchAnObjectByValue(String value){
+		if (value == null || value.length() == 0)
+			return;
 		Goods goods = mapGoods.get(value);
 		if (goods == null){
 			goods = searchAnObjectByName(value);
 			if (goods == null){
-				return;
+				goods = HttpUtil.loadGoodsByBarcode(this, value);
+				if (goods == null){
+					JOptionPane.showMessageDialog(this, Messages.getString("MainFrame.NoFindByBarcode") + value);
+					return;
+				} else {
+					//replace local object
+					mapGoods.put(value, goods);
+				}
 			}
 		}
-		tfSearch.setText("");
 		ChoosedGoods cg = new ChoosedGoods();
 		cg.amount = 1;
 		cg.goods = goods;
@@ -494,12 +555,12 @@ public class MainFrame extends JFrame implements ActionListener{
 		Iterator<Goods> it = mapGoods.values().iterator();
 		while(it.hasNext()){
 			Goods g = it.next();
-			if (g.getName().indexOf(name) >= 0){
+			if (g.getName().toLowerCase().indexOf(name.toLowerCase()) >= 0){
 				resultlist.add(g);
 			}
 		}
 		if (resultlist.isEmpty()){
-			JOptionPane.showMessageDialog(this, Messages.getString("MainFrame.NoFindByBarcode") + name);
+//			JOptionPane.showMessageDialog(this, Messages.getString("MainFrame.NoFindByBarcode") + name);
 			return null;
 		}else if (resultlist.size() == 1){
 			return resultlist.get(0);
@@ -535,7 +596,7 @@ public class MainFrame extends JFrame implements ActionListener{
 	}
 	
 	public void putFocusOnTFBarcode(){
-		tfSearch.requestFocusInWindow();
+		tfSearchGoods.requestFocusInWindow();
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
@@ -569,6 +630,12 @@ public class MainFrame extends JFrame implements ActionListener{
 			showMemberInfo(null);
 			modelGoods.setMember(null);
 			calculatePrice();
+		} else if (e.getSource() == miDeleteItem){
+			doDeleteItem();
+		} else if (e.getSource() == miDeleteAllItem){
+			doDeleteAllItem();
+		} else if (e.getSource() == miChangePrice){
+			doChangePrice();
 		}
 	}
 	
@@ -636,6 +703,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		modelGoods.fireTableDataChanged();
 		calculatePrice();
 		member = null;
+		modelGoods.setMember(null);
 		showMemberInfo(null);
 	}
 	
@@ -667,14 +735,16 @@ public class MainFrame extends JFrame implements ActionListener{
 		} else {
 			String msg = Messages.getString("MainFrame.OffDutyMsg") + onDutyUser.getName(); //$NON-NLS-1$
 			Object[] options = { Messages.getString("MainFrame.ShiftWork"),
-					Messages.getString("MainFrame.ShiftWorkPrint"), Messages.getString("Cancel") };
+//					Messages.getString("MainFrame.ShiftWorkPrint"), 
+					Messages.getString("Cancel") };
 			int n = JOptionPane.showOptionDialog(this, msg, Messages.getString("MainFrame.ShiftWorkTitle"),
 					JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 			if (n == 0) {
 				doOffDuty(onDutyUser, false);
-			} else if (n == 1) {
-				doOffDuty(onDutyUser, true);
-			}
+			} 
+//			else if (n == 1) {
+//				doOffDuty(onDutyUser, true);
+//			}
 		}
 	}
 	

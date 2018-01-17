@@ -14,6 +14,8 @@ public class IndentDetail {
 	
 	private String goodsName;
 	
+	private double soldPrice;
+	
 	public Indent getIndent() {
 		return indent;
 	}
@@ -61,6 +63,14 @@ public class IndentDetail {
 
 	public void setGoodsName(String goodsName) {
 		this.goodsName = goodsName;
+	}
+
+	public double getSoldPrice() {
+		return soldPrice;
+	}
+
+	public void setSoldPrice(double soldPrice) {
+		this.soldPrice = soldPrice;
 	}
 
 	@Override

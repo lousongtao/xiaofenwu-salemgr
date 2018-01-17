@@ -19,7 +19,8 @@ public class GoodsTableModel extends DefaultTableModel{
 			Messages.getString("GoodsTableModel.Header.Barcode"),
 			Messages.getString("GoodsTableModel.Header.Amount"),
 			Messages.getString("GoodsTableModel.Header.SellPrice"),
-			Messages.getString("GoodsTableModel.Header.MemberDiscountPrice")
+			Messages.getString("GoodsTableModel.Header.MemberDiscountPrice"),
+			Messages.getString("GoodsTableModel.Header.ModifiedPrice")
 	};
 
 	public GoodsTableModel(){
@@ -57,6 +58,9 @@ public class GoodsTableModel extends DefaultTableModel{
 				return String.format(ConstantValue.FORMAT_DOUBLE, member.getDiscountRate() * cg.goods.getSellPrice());
 			}
 			return "";
+		case 5:
+			if (cg.modifiedPrice < 0) return "";
+			return cg.modifiedPrice;
 		}
 		return "";
 	}

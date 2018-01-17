@@ -89,7 +89,8 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 		tableIndent.getColumnModel().getColumn(2).setPreferredWidth(120);
 		tableIndent.getColumnModel().getColumn(3).setPreferredWidth(120);
 		tableIndent.getColumnModel().getColumn(4).setPreferredWidth(120);
-		tableIndent.getColumnModel().getColumn(5).setPreferredWidth(210);
+		tableIndent.getColumnModel().getColumn(5).setPreferredWidth(120);
+		tableIndent.getColumnModel().getColumn(6).setPreferredWidth(210);
 		JScrollPane jspTableIndent = new JScrollPane(tableIndent, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		tableIndent.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		
@@ -265,7 +266,7 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 	
 	class IndentModel extends DefaultTableModel{
 
-		private String[] header = new String[]{"Status","Member Card", "Price", "Paid Price", "Pay Way", "Time", };
+		private String[] header = new String[]{"Status","Member Card", "Member Name", "Price", "Paid Price", "Pay Way", "Time"};
 		
 		public IndentModel(){
 
@@ -292,13 +293,18 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 					return "UNPAID";
 			case 1:
 				return indent.getMemberCard();
-			case 2: 
+			case 2:
+				Member m = mainFrame.getMemberByMemberCard(indent.getMemberCard());
+				if (m != null)
+					return m.getName();
+				return "";
+			case 3: 
 				return indent.getTotalPrice();
-			case 3:
-				return indent.getPaidPrice();
 			case 4:
+				return indent.getPaidPrice();
+			case 5:
 				return indent.getPayWay();
-			case 5: 
+			case 6: 
 				return ConstantValue.DFYMDHMS.format(indent.getCreateTime());
 			
 			}
@@ -326,7 +332,7 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 
 	class IndentDetailModel extends DefaultTableModel{
 
-		private String[] header = new String[]{"Name", "Amount", "Price"};
+		private String[] header = new String[]{"Name", "Amount", "Goods Price", "Sold Price"};
 		private ArrayList<IndentDetail> details = new ArrayList<>();
 		public IndentDetailModel(){
 		}
@@ -351,6 +357,8 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 				return detail.getAmount();
 			case 2:
 				return detail.getGoodsPrice();
+			case 3:
+				return detail.getSoldPrice();
 			}
 			return "";
 		}

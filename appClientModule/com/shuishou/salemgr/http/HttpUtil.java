@@ -190,6 +190,26 @@ public class HttpUtil {
 		}
 		return result.data;
 	}
+    
+    public static Goods loadGoodsByBarcode(MainFrame parent, String barcode){
+		String url = "goods/querygoodsbybarcode";
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("barCode", barcode);
+		String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "utf-8");
+		if (response == null){
+			logger.error("get null from server for loading goods by barcode " + barcode + ". URL = " + url);
+			JOptionPane.showMessageDialog(parent, "get null from server for loading goods by barcode " + barcode + ". URL = " + url);
+			return null;
+		}
+		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		HttpResult<Goods> result = gson.fromJson(response, new TypeToken<HttpResult<Goods>>(){}.getType());
+		if (!result.success){
+			logger.error("return false while loading goods by barcode " + barcode + ". URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, "return false while loading goods by barcode " + barcode + ". URL = " + url + ", response = "+response);
+			return null;
+		}
+		return result.data;
+	}
 	
     public static HashMap<String, String> loadConfigsMap(MainFrame parent){
 		String url = "common/queryconfigmap";

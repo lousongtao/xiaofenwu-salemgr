@@ -23,7 +23,18 @@ private int id;
 	
 	private int indentType;
 	
+	private String indentCode;
 	
+	
+	
+	public String getIndentCode() {
+		return indentCode;
+	}
+
+	public void setIndentCode(String indentCode) {
+		this.indentCode = indentCode;
+	}
+
 	public int getIndentType() {
 		return indentType;
 	}

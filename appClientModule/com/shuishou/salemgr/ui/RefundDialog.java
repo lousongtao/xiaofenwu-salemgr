@@ -35,9 +35,15 @@ import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.shuishou.salemgr.ConstantValue;
 import com.shuishou.salemgr.Messages;
 import com.shuishou.salemgr.beans.DiscountTemplate;
+import com.shuishou.salemgr.beans.HttpResult;
+import com.shuishou.salemgr.beans.Indent;
+import com.shuishou.salemgr.beans.IndentDetail;
 import com.shuishou.salemgr.beans.Member;
 import com.shuishou.salemgr.beans.PayWay;
 import com.shuishou.salemgr.http.HttpUtil;
@@ -84,8 +90,8 @@ public class RefundDialog extends JDialog{
 		if (member != null){
 			lbMemberInfo.setText(Messages.getString("CheckoutDialog.MemberInfo.Name")+ member.getName() + ", " 
 				+ Messages.getString("CheckoutDialog.MemberInfo.DiscountRate") + member.getDiscountRate() + ", "
-				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + member.getScore() + ", "
-				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + member.getBalanceMoney());
+				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + ", "
+				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + String.format(ConstantValue.FORMAT_DOUBLE, member.getBalanceMoney()));
 		}
 		
 		JPanel pButton = new JPanel(new GridBagLayout());
@@ -117,7 +123,7 @@ public class RefundDialog extends JDialog{
 		c.add(tfRefundPrice,	new GridBagConstraints(1, 4, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		c.add(pButton, 			new GridBagConstraints(0, 5, 2, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		
-		this.setSize(new Dimension(450, 400));
+		this.setSize(new Dimension(550, 500));
 		this.setLocation((int)(mainFrame.getWidth() / 2 - this.getWidth() /2 + mainFrame.getLocation().getX()), 
 				(int)(mainFrame.getHeight() / 2 - this.getHeight() / 2 + mainFrame.getLocation().getY()));
 		
@@ -164,43 +170,48 @@ public class RefundDialog extends JDialog{
 		params.put("refundPrice", refundPrice + "");
 
 		String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
-		JSONObject jsonObj = new JSONObject(response);
-		if (!jsonObj.getBoolean("success")){
-			logger.error("Do checkout failed. URL = " + url + ", param = "+ params);
-			JOptionPane.showMessageDialog(mainFrame, Messages.getString("RefundDialog.FailRefundMsg") + jsonObj.getString("result")); //$NON-NLS-1$
+		if (response == null){
+			logger.error("get null from server for doing refund. URL = " + url);
+			JOptionPane.showMessageDialog(this, "get null from server for doing refund. URL = " + url);
+			return;
 		}
-		doPrintTicket();
+		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
+		if (!result.success){
+			logger.error("return false while doing refund. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(this, "return false while doing refund. URL = " + url + ", response = "+response);
+			return;
+		}
+		doPrintTicket(result.data);
 		//clean table
 		mainFrame.clearTable();
 		RefundDialog.this.setVisible(false);
 	}
 	
-	private void doPrintTicket(){
+	private void doPrintTicket(Indent indent){
 		Map<String,String> keyMap = new HashMap<String, String>();
 		if (member != null){
 			//reload member data from server
 			member = HttpUtil.doLoadMember(RefundDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
 			//store into local memory
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
-			keyMap.put("member", member.getMemberCard() + "  score : "+ String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
+			keyMap.put("member", member.getMemberCard() + ", points: "+ String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + ", discount: " + (member.getDiscountRate() * 100) + "%");
 		}else {
 			keyMap.put("member", "");
 		}
 		keyMap.put("cashier", mainFrame.getOnDutyUser().getName());
-		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(new Date()));
-		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE,refundPrice));
-		
-		keyMap.put("totalPriceIncludeGST", String.format(ConstantValue.FORMAT_DOUBLE,refundPrice));
-		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, refundPrice/11));
+		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(indent.getCreateTime()));
+		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE,indent.getPaidPrice()));
+		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()/11));
 
 		List<Map<String, String>> goods = new ArrayList<>();
-		for (int i = 0; i< choosedGoods.size(); i++) {
-			ChoosedGoods cg = choosedGoods.get(i);
+		for (int i = 0; i< indent.getItems().size(); i++) {
+			IndentDetail detail = indent.getItems().get(i);
 			Map<String, String> mg = new HashMap<String, String>();
-			mg.put("name", cg.goods.getName());
-			mg.put("price", String.format(ConstantValue.FORMAT_DOUBLE, cg.goods.getSellPrice()));
-			mg.put("amount", cg.amount + "");
-			mg.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE, cg.goods.getSellPrice() * cg.amount));
+			mg.put("name", detail.getGoodsName());
+			mg.put("price", String.format(ConstantValue.FORMAT_DOUBLE, detail.getGoodsPrice()));
+			mg.put("amount", detail.getAmount() + "");
+			mg.put("subTotal", String.format(ConstantValue.FORMAT_DOUBLE, detail.getSoldPrice() * detail.getAmount()));
 			goods.add(mg);
 		}
 		Map<String, Object> params = new HashMap<String, Object>();

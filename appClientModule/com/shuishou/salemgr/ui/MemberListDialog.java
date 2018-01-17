@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
 import javax.swing.JButton;
@@ -46,6 +48,9 @@ public class MemberListDialog extends JDialog{
 		table.getColumnModel().getColumn(1).setPreferredWidth(200);
 		table.getColumnModel().getColumn(2).setPreferredWidth(150);
 		table.getColumnModel().getColumn(3).setPreferredWidth(150);
+		table.getColumnModel().getColumn(4).setPreferredWidth(120);
+		table.getColumnModel().getColumn(5).setPreferredWidth(120);
+		table.getColumnModel().getColumn(6).setPreferredWidth(120);
 		JScrollPane jspTable = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		JButton btnConfirm = new JButton("Choose");
 		JButton btnCancel = new JButton("Cancel");
@@ -71,6 +76,13 @@ public class MemberListDialog extends JDialog{
 			public void actionPerformed(ActionEvent e) {
 				MemberListDialog.this.setVisible(false);
 			}});
+		table.addMouseListener(new MouseAdapter(){
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					doConfirm();
+				}
+			}
+		});
 	}
 	
 	private void doConfirm(){
@@ -88,7 +100,7 @@ public class MemberListDialog extends JDialog{
 	
 	class MemberTableModel extends DefaultTableModel{
 		private ArrayList<Member> items = new ArrayList<>();
-		private String[] header = new String[]{"Name", "Member Card", "Join Date", "Telephone"};
+		private String[] header = new String[]{"Name", "Member Card", "Join Date", "Telephone", "Points", "Discount Rate", "Balance"};
 
 		public MemberTableModel(){
 		}
@@ -120,6 +132,12 @@ public class MemberListDialog extends JDialog{
 				return ConstantValue.DFYMD.format(m.getCreateTime());
 			case 3:
 				return m.getTelephone();
+			case 4:
+				return m.getScore();
+			case 5:
+				return m.getDiscountRate();
+			case 6:
+				return m.getBalanceMoney();
 			}
 			return "";
 		}
