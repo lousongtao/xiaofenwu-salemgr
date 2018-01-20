@@ -49,6 +49,14 @@
 		"type": 0
 	},
 	{
+		"text": "OrderNo：{$orderNo}",
+		"size": 9,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
 		"text": "---------------------------------------",
 		"size": 9,
 		"bold": false,
@@ -79,11 +87,11 @@
 		"variable": "amount"
 	},
 	{
-		"name": "Total",
-		"width": 5,
+		"name": "subTotal",
+		"width": 8,
 		"size":9,
 		"bold": false,
-		"variable": "totalPrice"
+		"variable": "subTotal"
 	}],
 	
 
@@ -129,7 +137,7 @@
 	},
 	{
 		"text": "Member：{$member}",
-		"size": 9,
+		"size": 8,
 		"bold": false,
 		"align": 0,
 		"line": true,

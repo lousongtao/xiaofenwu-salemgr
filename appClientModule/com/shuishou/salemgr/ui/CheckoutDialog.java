@@ -430,7 +430,7 @@ public class CheckoutDialog extends JDialog{
 		}else {
 			keyMap.put("member", "");
 		}
-		keyMap.put("cashier", mainFrame.getOnDutyUser().getName());
+		keyMap.put("cashier", indent.getOperator());
 		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(indent.getCreateTime()));
 		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()));
 		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()/11));

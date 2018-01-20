@@ -99,7 +99,8 @@ public class ConstantValue {
 	
 	public static final String TICKET_TEMPLATE_PURCHASE = "/purchase_ticket.json";
 	public static final String TICKET_TEMPLATE_REFUND = "/refund_ticket.json";
-	public static final String TICKET_TEMPLATE_PREBUY = "/prebuy_ticket.json";
+	public static final String TICKET_TEMPLATE_PREBUY = "/preorder_ticket.json";
+	public static final String TICKET_TEMPLATE_PREBUY_ALL = "/preorder_ticket_all.json";
 	
 	public static final byte INDENT_TYPE_ORDER = 1;//普通订单
 	public static final byte INDENT_TYPE_REFUND = 2;//退货单

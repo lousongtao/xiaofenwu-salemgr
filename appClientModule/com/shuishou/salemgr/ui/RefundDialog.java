@@ -199,11 +199,11 @@ public class RefundDialog extends JDialog{
 		}else {
 			keyMap.put("member", "");
 		}
-		keyMap.put("cashier", mainFrame.getOnDutyUser().getName());
+		keyMap.put("cashier", indent.getOperator());
 		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(indent.getCreateTime()));
 		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE,indent.getPaidPrice()));
 		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()/11));
-
+		keyMap.put("orderNo", indent.getIndentCode());
 		List<Map<String, String>> goods = new ArrayList<>();
 		for (int i = 0; i< indent.getItems().size(); i++) {
 			IndentDetail detail = indent.getItems().get(i);

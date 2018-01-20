@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.shuishou.salemgr.ConstantValue;
 import com.shuishou.salemgr.Messages;
+import com.shuishou.salemgr.beans.Goods;
 import com.shuishou.salemgr.beans.HttpResult;
 import com.shuishou.salemgr.beans.Indent;
 import com.shuishou.salemgr.beans.IndentDetail;
@@ -53,10 +55,12 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 	private JTextField tfMemberCard = new JTextField();
 	private JDatePicker dpStartDate = new JDatePicker();
 	private JDatePicker dpEndDate = new JDatePicker();
-	private JButton btnQuery = new JButton("Query");
-	private JButton btnClose = new JButton("Close");
-	private JButton btnDelete = new JButton("Delete");
+	private JButton btnQuery = new JButton(Messages.getString("Query"));
+	private JButton btnClose = new JButton(Messages.getString("CloseDialog"));
+	private JButton btnDelete = new JButton(Messages.getString("Delete"));
 	private JButton btnChangeToOrder = new JButton("Change To Order");
+	private JButton btnPrintOneOrder = new JButton("Print Order");
+	private JButton btnPrintAllOrder = new JButton("Print All Orders");
 	
 	private JTable tableIndent = new JTable();
 	private IndentModel modelIndent = new IndentModel();
@@ -74,7 +78,7 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 	}
 	
 	private void initUI(){
-		JLabel lbTableName = new JLabel("Member Card : ");
+		JLabel lbTableName = new JLabel(Messages.getString("MemberCard"));
 		JLabel lbStartDate = new JLabel("Start Date : ");
 		JLabel lbEndDate = new JLabel("End Date : ");
 		tfMemberCard.setPreferredSize(new Dimension(150, 25));
@@ -84,13 +88,15 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 		tableIndent.setModel(modelIndent);
 		tableIndent.setRowHeight(40);
 		tableIndent.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		tableIndent.getColumnModel().getColumn(0).setPreferredWidth(120);
+		tableIndent.getColumnModel().getColumn(0).setPreferredWidth(210);
 		tableIndent.getColumnModel().getColumn(1).setPreferredWidth(120);
 		tableIndent.getColumnModel().getColumn(2).setPreferredWidth(120);
 		tableIndent.getColumnModel().getColumn(3).setPreferredWidth(120);
 		tableIndent.getColumnModel().getColumn(4).setPreferredWidth(120);
 		tableIndent.getColumnModel().getColumn(5).setPreferredWidth(120);
-		tableIndent.getColumnModel().getColumn(6).setPreferredWidth(210);
+		tableIndent.getColumnModel().getColumn(6).setPreferredWidth(120);
+		
+		tableIndent.setAutoCreateRowSorter(true);
 		JScrollPane jspTableIndent = new JScrollPane(tableIndent, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		tableIndent.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		
@@ -98,8 +104,9 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 		tableIndentDetail.setRowHeight(40);
 		tableIndentDetail.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tableIndentDetail.getColumnModel().getColumn(0).setPreferredWidth(250);
-		tableIndentDetail.getColumnModel().getColumn(1).setPreferredWidth(80);
-		tableIndentDetail.getColumnModel().getColumn(2).setPreferredWidth(80);
+		tableIndentDetail.getColumnModel().getColumn(1).setPreferredWidth(120);
+		tableIndentDetail.getColumnModel().getColumn(2).setPreferredWidth(120);
+		tableIndentDetail.getColumnModel().getColumn(3).setPreferredWidth(120);
 		JScrollPane jspTableIndentDetail = new JScrollPane(tableIndentDetail, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		tableIndentDetail.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		
@@ -114,17 +121,21 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 		JPanel pButton = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		pButton.add(btnQuery);
 		pButton.add(btnChangeToOrder);
+		pButton.add(btnPrintOneOrder);
+		pButton.add(btnPrintAllOrder);
 		pButton.add(btnDelete);
 		pButton.add(btnClose);
 		
 		btnQuery.addActionListener(this);
 		btnClose.addActionListener(this);
 		btnDelete.addActionListener(this);
+		btnPrintOneOrder.addActionListener(this);
+		btnPrintAllOrder.addActionListener(this);
 		btnChangeToOrder.addActionListener(this);
 		
 		JPanel pTable = new JPanel(new GridBagLayout());
-		pTable.add(jspTableIndent,		new GridBagConstraints(0, 0, 1, 1, 3, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(10, 10, 0, 0), 0, 0));
-		pTable.add(jspTableIndentDetail,new GridBagConstraints(1, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(10, 10, 0, 0), 0, 0));
+		pTable.add(jspTableIndent,		new GridBagConstraints(0, 0, 1, 1, 1, 2, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(10, 10, 0, 0), 0, 0));
+		pTable.add(jspTableIndentDetail,new GridBagConstraints(0, 1, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(10, 10, 0, 0), 0, 0));
 		
 		setLayout(new GridBagLayout());
 		add(pCondition, new GridBagConstraints(0, 0, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(10, 10, 0, 0), 0, 0));
@@ -183,11 +194,15 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 			JOptionPane.showMessageDialog(this, "Please choose a record from Order table.", "Error", JOptionPane.YES_NO_OPTION);
 			return;
 		}
+		if (JOptionPane.showConfirmDialog(this, "Do you want to change this preorder to order?", "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
+			return;
 		Indent indent = HttpUtil.doChangePreOrderToOrder(this, mainFrame.getOnDutyUser(), modelIndent.getObjectAt(row).getId() + "");
 		if (indent != null){
 			doPrintTicket(indent);
 			modelIndent.deleteRow(row);
 			modelIndent.fireTableDataChanged();
+			modelIndentDetail.clearData();
+			modelIndentDetail.fireTableDataChanged();
 		}
 	}
 	
@@ -214,20 +229,24 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 		keyMap.put("cashier", mainFrame.getOnDutyUser().getName());
 		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(new Date()));
 		keyMap.put("totalPrice", indent.getPaidPrice() + "");
-		
-		keyMap.put("totalPriceIncludeGST", indent.getPaidPrice() + "");
 		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()/11));
 		keyMap.put("payWay", indent.getPayWay());
+		keyMap.put("orderNo", indent.getIndentCode());
+		keyMap.put("getcash", "");
+		keyMap.put("change", "");
 		List<Map<String, String>> goods = new ArrayList<>();
+		double originPrice = 0;
 		for (int i = 0; i< indent.getItems().size(); i++) {
 			IndentDetail detail = indent.getItems().get(i);
 			Map<String, String> mg = new HashMap<String, String>();
 			mg.put("name", detail.getGoodsName());
 			mg.put("price", String.format(ConstantValue.FORMAT_DOUBLE, detail.getGoodsPrice()));
 			mg.put("amount", detail.getAmount() + "");
-			mg.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE, detail.getAmount() * detail.getGoodsPrice()));
+			mg.put("subTotal", String.format(ConstantValue.FORMAT_DOUBLE, detail.getAmount() * detail.getSoldPrice()));
 			goods.add(mg);
+			originPrice += detail.getGoodsPrice() * detail.getAmount();
 		}
+		keyMap.put("originPrice", String.format(ConstantValue.FORMAT_DOUBLE, originPrice));
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("keys", keyMap);
 		params.put("goods", goods);
@@ -248,7 +267,94 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 			JOptionPane.showMessageDialog(this, "Delete preorder successfully");
 			modelIndent.deleteRow(row);
 			modelIndent.fireTableDataChanged();
+			modelIndentDetail.clearData();
+			modelIndentDetail.fireTableDataChanged();
 		}
+	}
+	
+	private void doPrintOneOrder(){
+		if (tableIndent.getSelectedRow() < 0)
+			return;
+		Indent indent = ((IndentModel)tableIndent.getModel()).getObjectAt(tableIndent.getSelectedRow());
+		Map<String,String> keyMap = new HashMap<String, String>();
+		if (indent.getMemberCard() != null && indent.getMemberCard().length() > 0){
+			//reload member data from server
+			Member member = HttpUtil.doLoadMember(this, mainFrame.getOnDutyUser(), indent.getMemberCard());
+			//store into local memory
+			mainFrame.getMapMember().put(member.getMemberCard(), member);
+			keyMap.put("member", member.getMemberCard() + "  point : "+ String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
+		}else {
+			keyMap.put("member", "");
+			keyMap.put("discount", "");
+		}
+		keyMap.put("cashier", indent.getOperator());
+		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(indent.getCreateTime()));
+		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE,indent.getPaidPrice()));
+		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()/11));
+		if (indent.getIndentType() == ConstantValue.INDENT_TYPE_PREBUY_PAID){
+			keyMap.put("payWay", indent.getPayWay());
+		} else {
+			keyMap.put("payWay", "Unpaid");
+		}
+		
+		keyMap.put("getcash", "");
+		keyMap.put("change", "");
+		keyMap.put("orderNo", indent.getIndentCode());
+		List<Map<String, String>> goods = new ArrayList<>();
+		for (int i = 0; i< indent.getItems().size(); i++) {
+			IndentDetail detail = indent.getItems().get(i);
+			Map<String, String> mg = new HashMap<String, String>();
+			mg.put("name", detail.getGoodsName());
+			mg.put("price", String.format(ConstantValue.FORMAT_DOUBLE, detail.getGoodsPrice()));
+			mg.put("amount", detail.getAmount() + "");
+			mg.put("subTotal", String.format(ConstantValue.FORMAT_DOUBLE, detail.getSoldPrice() * detail.getAmount()));
+			goods.add(mg);
+		}
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("keys", keyMap);
+		params.put("goods", goods);
+		PrintJob job = new PrintJob(ConstantValue.TICKET_TEMPLATE_PREBUY, params, mainFrame.printerName);
+		PrintQueue.add(job);
+	}
+	
+	private void doPrintAllOrder(){
+		if (listIndent == null || listIndent.isEmpty())
+			return;
+		double totalPrice = 0;
+		HashMap<String, GoodsItem> mapGoodsAmount = new HashMap<>();
+		for(Indent indent : listIndent){
+			List<IndentDetail> details = indent.getItems();
+			for(IndentDetail detail : details){
+				GoodsItem gi = mapGoodsAmount.get(detail.getGoodsName());
+				if (gi == null){
+					gi = new GoodsItem(detail.getGoodsName(), detail.getGoodsPrice(), 0);
+					mapGoodsAmount.put(detail.getGoodsName(), gi);
+				}
+				gi.amount += detail.getAmount();
+			}
+		}
+		Indent indent = ((IndentModel)tableIndent.getModel()).getObjectAt(tableIndent.getSelectedRow());
+		Map<String,String> keyMap = new HashMap<String, String>();
+		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(new Date()));
+		
+		List<Map<String, String>> goods = new ArrayList<>();
+		Iterator<GoodsItem> itValue = mapGoodsAmount.values().iterator();
+		while(itValue.hasNext()){
+			GoodsItem gi = itValue.next();
+			Map<String, String> mg = new HashMap<String, String>();
+			mg.put("name", gi.goodsname);
+			mg.put("price", String.format(ConstantValue.FORMAT_DOUBLE, gi.price));
+			mg.put("amount", gi.amount + "");
+			mg.put("total", String.format(ConstantValue.FORMAT_DOUBLE, gi.amount * gi.price));
+			goods.add(mg);
+			totalPrice += gi.amount * gi.price;
+		}
+		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE, totalPrice));
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("keys", keyMap);
+		params.put("goods", goods);
+		PrintJob job = new PrintJob(ConstantValue.TICKET_TEMPLATE_PREBUY_ALL, params, mainFrame.printerName);
+		PrintQueue.add(job);
 	}
 	
 	@Override
@@ -261,12 +367,22 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 			this.setVisible(false);
 		} else if (e.getSource() == btnDelete){
 			doDelete();
+		} else if (e.getSource() == btnPrintOneOrder){
+			doPrintOneOrder();
+		} else if (e.getSource() == btnPrintAllOrder){
+			doPrintAllOrder();
 		}
 	}
 	
 	class IndentModel extends DefaultTableModel{
 
-		private String[] header = new String[]{"Status","Member Card", "Member Name", "Price", "Paid Price", "Pay Way", "Time"};
+		private String[] header = new String[]{Messages.getString("Time"), 
+				Messages.getString("Status"),
+				Messages.getString("MemberCard"), 
+				Messages.getString("MemberName"), 
+				Messages.getString("OriginPrice"), 
+				Messages.getString("DiscountPrice"), 
+				"Pay Way"};
 		
 		public IndentModel(){
 
@@ -286,27 +402,26 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 		public Object getValueAt(int rowIndex, int columnIndex) {
 			Indent indent = listIndent.get(rowIndex);
 			switch(columnIndex){
-			case 0:
-				if (indent.getIndentType() == ConstantValue.INDENT_TYPE_PREBUY_PAID)
-					return "PAID";
-				else 
-					return "UNPAID";
+			case 0: 
+				return ConstantValue.DFYMDHMS.format(indent.getCreateTime());
 			case 1:
-				return indent.getMemberCard();
+				if (indent.getIndentType() == ConstantValue.INDENT_TYPE_PREBUY_PAID)
+					return Messages.getString("PreorderQueryDialog.Paid");
+				else 
+					return Messages.getString("PreorderQueryDialog.Unpaid");
 			case 2:
+				return indent.getMemberCard();
+			case 3:
 				Member m = mainFrame.getMemberByMemberCard(indent.getMemberCard());
 				if (m != null)
 					return m.getName();
 				return "";
-			case 3: 
+			case 4: 
 				return indent.getTotalPrice();
-			case 4:
-				return indent.getPaidPrice();
 			case 5:
+				return indent.getPaidPrice();
+			case 6:
 				return indent.getPayWay();
-			case 6: 
-				return ConstantValue.DFYMDHMS.format(indent.getCreateTime());
-			
 			}
 			return "";
 		}
@@ -381,7 +496,18 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 		}
 		
 		public boolean isCellEditable(int row, int column) {
-        return false;
-    }
+			return false;
+		}
+	}
+	
+	class GoodsItem{
+		String goodsname;
+		int amount;
+		double price;
+		public GoodsItem(String goodsname, double price, int amount){
+			this.goodsname = goodsname;
+			this.price = price;
+			this.amount = amount;
+		}
 	}
 }

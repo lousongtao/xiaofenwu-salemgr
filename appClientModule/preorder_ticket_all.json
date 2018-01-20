@@ -17,39 +17,16 @@
 		"type": 0
 	},
 	{
-		"text": "Refund",
+		"text": "All Pre-orders",
 		"size": 9,
 		"bold": true,
 		"align": 1,
 		"line": true,
 		"type": 0
 	},
+	
 	{
-		"text": "ABN：83 607 054 697",
-		"size": 9,
-		"bold": false,
-		"align": 0,
-		"line": true,
-		"type": 0
-	},
-	{
-		"text": "Cashier：{$cashier}",
-		"size": 9,
-		"bold": false,
-		"align": 0,
-		"line": true,
-		"type": 0
-	},
-	{
-		"text": "Refund time：{$dateTime}",
-		"size": 9,
-		"bold": false,
-		"align": 0,
-		"line": true,
-		"type": 0
-	},
-	{
-		"text": "OrderNo：{$orderNo}",
+		"text": "time：{$dateTime}",
 		"size": 9,
 		"bold": false,
 		"align": 0,
@@ -87,11 +64,11 @@
 		"variable": "amount"
 	},
 	{
-		"name": "subTotal",
+		"name": "Total",
 		"width": 8,
 		"size":9,
 		"bold": false,
-		"variable": "subTotal"
+		"variable": "total"
 	}],
 	
 
@@ -111,22 +88,7 @@
 		"line": true,
 		"type": 0
 	},
-	{
-		"text": "GST:                      ${$gst}",
-		"size": 9,
-		"bold": false,
-		"align": 0,
-		"line": true,
-		"type": 0
-	},
-	{
-		"text": "Member：{$member}",
-		"size": 9,
-		"bold": false,
-		"align": 0,
-		"line": true,
-		"type": 0
-	},
+	
 	{
 		"text": "---------------------------------------",
 		"size": 9,

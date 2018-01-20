@@ -89,7 +89,7 @@
 	},
 	{
 		"name": "SubTotal",
-		"width": 5,
+		"width": 8,
 		"size":9,
 		"bold": false,
 		"variable": "subTotal"
@@ -113,7 +113,7 @@
 		"type": 0
 	},
 	{
-		"text": "Total:                    ${$totalPrice}",
+		"text": "Total:                        ${$totalPrice}",
 		"size": 8,
 		"bold": false,
 		"align": 0,
@@ -122,7 +122,7 @@
 	},
 	
 	{
-		"text": "GST:                      ${$gst}",
+		"text": "GST:                         ${$gst}",
 		"size": 8,
 		"bold": false,
 		"align": 0,
@@ -130,7 +130,7 @@
 		"type": 0
 	},
 	{
-		"text": "Payment Type:             {$payWay}",
+		"text": "Payment Type:          {$payWay}",
 		"size": 8,
 		"bold": false,
 		"align": 0,
@@ -138,7 +138,7 @@
 		"type": 0
 	},
 	{
-		"text": "Cash:                     {$getcash}",
+		"text": "Cash:                        {$getcash}",
 		"size": 8,
 		"bold": false,
 		"align": 0,
@@ -146,7 +146,7 @@
 		"type": 0
 	},
 	{
-		"text": "Change:                   {$change}",
+		"text": "Change:                    {$change}",
 		"size": 8,
 		"bold": false,
 		"align": 0,

@@ -25,8 +25,17 @@ private int id;
 	
 	private String indentCode;
 	
+	private String operator;//操作人
 	
 	
+	public String getOperator() {
+		return operator;
+	}
+
+	public void setOperator(String operator) {
+		this.operator = operator;
+	}
+
 	public String getIndentCode() {
 		return indentCode;
 	}

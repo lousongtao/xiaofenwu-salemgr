@@ -188,8 +188,8 @@ public class PreOrderCheckoutDialog extends JDialog{
 		
 		lbPrice.setFont(ConstantValue.FONT_25BOLD);
 		lbDiscountPrice.setFont(ConstantValue.FONT_25BOLD);
-		lbPrice.setText(Messages.getString("CheckoutDialog.Price") + sellPrice); //$NON-NLS-1$
-		lbDiscountPrice.setText(Messages.getString("CheckoutDialog.DiscountPrice") + String.format("%.2f", discountPrice)); //$NON-NLS-1$
+		lbPrice.setText(Messages.getString("CheckoutDialog.Price") + String.format(ConstantValue.FORMAT_DOUBLE, sellPrice)); //$NON-NLS-1$
+		lbDiscountPrice.setText(Messages.getString("CheckoutDialog.DiscountPrice") + String.format(ConstantValue.FORMAT_DOUBLE, discountPrice)); //$NON-NLS-1$
 		
 		Container c = this.getContentPane();
 		c.setLayout(new GridBagLayout());
@@ -371,6 +371,8 @@ public class PreOrderCheckoutDialog extends JDialog{
 				}
 			}
 		}
+		if (!paid)
+			params.put("payWay", "");
 		params.put("paid", String.valueOf(paid));
 		
 		String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
@@ -418,19 +420,19 @@ public class PreOrderCheckoutDialog extends JDialog{
 			keyMap.put("member", "");
 			keyMap.put("discount", "");
 		}
-		keyMap.put("cashier", mainFrame.getOnDutyUser().getName());
+		keyMap.put("cashier", indent.getOperator());
 		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(indent.getCreateTime()));
 		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE,indent.getPaidPrice()));
 		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()/11));
+		keyMap.put("orderNo", indent.getIndentCode());
 		if (paid){
-			keyMap.put("pwyWay", indent.getPayWay());
+			keyMap.put("payWay", indent.getPayWay());
 		} else {
 			keyMap.put("payWay", "Unpaid");
 		}
-		
 		if (rbPayCash.isSelected() && tfGetCash.getText() != null && tfGetCash.getText().length() > 0){
-			keyMap.put("getcash", tfGetCash.getText());
-			keyMap.put("change", String.format(ConstantValue.FORMAT_DOUBLE, Double.parseDouble(tfGetCash.getText()) - indent.getPaidPrice()));
+			keyMap.put("getcash", "\\$" + tfGetCash.getText());
+			keyMap.put("change", "\\$" + String.format(ConstantValue.FORMAT_DOUBLE, Double.parseDouble(tfGetCash.getText()) - indent.getPaidPrice()));
 		} else {
 			keyMap.put("getcash", "");
 			keyMap.put("change", "");
