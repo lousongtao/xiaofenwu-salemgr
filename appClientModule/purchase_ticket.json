@@ -138,7 +138,7 @@
 		"type": 0
 	},
 	{
-		"text": "Cash:                        {$getcash}",
+		"text": "Get:                         {$getcash}",
 		"size": 8,
 		"bold": false,
 		"align": 0,

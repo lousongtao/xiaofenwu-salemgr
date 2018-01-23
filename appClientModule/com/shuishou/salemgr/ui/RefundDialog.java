@@ -38,6 +38,7 @@ import org.json.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.shuishou.salemgr.CommonTools;
 import com.shuishou.salemgr.ConstantValue;
 import com.shuishou.salemgr.Messages;
 import com.shuishou.salemgr.beans.DiscountTemplate;
@@ -90,8 +91,8 @@ public class RefundDialog extends JDialog{
 		if (member != null){
 			lbMemberInfo.setText(Messages.getString("CheckoutDialog.MemberInfo.Name")+ member.getName() + ", " 
 				+ Messages.getString("CheckoutDialog.MemberInfo.DiscountRate") + member.getDiscountRate() + ", "
-				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + ", "
-				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + String.format(ConstantValue.FORMAT_DOUBLE, member.getBalanceMoney()));
+				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + CommonTools.transferDouble2Scale(member.getScore()) + ", "
+				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + CommonTools.transferDouble2Scale(member.getBalanceMoney()));
 		}
 		
 		JPanel pButton = new JPanel(new GridBagLayout());
@@ -154,7 +155,7 @@ public class RefundDialog extends JDialog{
 			if (member == null)
 				jo.put("soldPrice", cg.goods.getSellPrice());
 			else 
-				jo.put("soldPrice", String.format(ConstantValue.FORMAT_DOUBLE, cg.goods.getSellPrice() * member.getDiscountRate()));
+				jo.put("soldPrice", CommonTools.transferDouble2Scale(cg.goods.getSellPrice() * member.getDiscountRate()));
 			ja.put(jo);
 		}
 		String url = "indent/refundindent";
@@ -195,23 +196,23 @@ public class RefundDialog extends JDialog{
 			member = HttpUtil.doLoadMember(RefundDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
 			//store into local memory
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
-			keyMap.put("member", member.getMemberCard() + ", points: "+ String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + ", discount: " + (member.getDiscountRate() * 100) + "%");
+			keyMap.put("member", member.getMemberCard() + ", points: "+ CommonTools.transferDouble2Scale(member.getScore()) + ", discount: " + (member.getDiscountRate() * 100) + "%");
 		}else {
 			keyMap.put("member", "");
 		}
 		keyMap.put("cashier", indent.getOperator());
 		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(indent.getCreateTime()));
-		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE,indent.getPaidPrice()));
-		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()/11));
+		keyMap.put("totalPrice", CommonTools.transferNumberByPM(indent.getPaidPrice(), ""));
+		keyMap.put("gst", CommonTools.transferNumberByPM(indent.getPaidPrice()/11, ""));
 		keyMap.put("orderNo", indent.getIndentCode());
 		List<Map<String, String>> goods = new ArrayList<>();
 		for (int i = 0; i< indent.getItems().size(); i++) {
 			IndentDetail detail = indent.getItems().get(i);
 			Map<String, String> mg = new HashMap<String, String>();
 			mg.put("name", detail.getGoodsName());
-			mg.put("price", String.format(ConstantValue.FORMAT_DOUBLE, detail.getGoodsPrice()));
+			mg.put("price", CommonTools.transferNumberByPM(detail.getGoodsPrice(), ""));
 			mg.put("amount", detail.getAmount() + "");
-			mg.put("subTotal", String.format(ConstantValue.FORMAT_DOUBLE, detail.getSoldPrice() * detail.getAmount()));
+			mg.put("subTotal", CommonTools.transferNumberByPM(detail.getSoldPrice() * detail.getAmount(), ""));
 			goods.add(mg);
 		}
 		Map<String, Object> params = new HashMap<String, Object>();

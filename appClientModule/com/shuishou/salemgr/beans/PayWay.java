@@ -7,11 +7,31 @@ public class PayWay {
 	
 	private String name;
 	
+	private double rate;
+	
+	private int sequence;
+	
 	public PayWay(){}
 	
 	public PayWay(int id, String name){
 		this.id = id;
 		this.name = name;
+	}
+
+	public double getRate() {
+		return rate;
+	}
+
+	public void setRate(double rate) {
+		this.rate = rate;
+	}
+
+	public int getSequence() {
+		return sequence;
+	}
+
+	public void setSequence(int sequence) {
+		this.sequence = sequence;
 	}
 
 	public int getId() {

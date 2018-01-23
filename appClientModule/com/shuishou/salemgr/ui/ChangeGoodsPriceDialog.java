@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -53,6 +55,23 @@ public class ChangeGoodsPriceDialog extends JDialog implements ActionListener{
 		c.add(lbModifiedPrice);
 		c.add(tfModifiedPrice);
 		c.add(pButton);
+		tfModifiedPrice.addKeyListener(new KeyAdapter(){
+			public void keyPressed(KeyEvent e) {
+				if (e.getID() != KeyEvent.KEY_PRESSED)
+					return;
+				if (e.getKeyCode() == KeyEvent.VK_ENTER){
+					if (tfModifiedPrice.getText() == null || tfModifiedPrice.getText().length() == 0){
+						JOptionPane.showMessageDialog(ChangeGoodsPriceDialog.this, "Must input the modified price.");
+						return;
+					}
+					if (getModifiedPrice() < 0){
+						JOptionPane.showMessageDialog(ChangeGoodsPriceDialog.this, "Don't allow to input a negative price.");
+						return;
+					}
+					setVisible(false);
+				}
+			}
+		});
 		this.setSize(new Dimension(350, 350));
 		this.setLocation((int)(mainFrame.getWidth() / 2 - this.getWidth() /2 + mainFrame.getLocation().getX()), 
 				(int)(mainFrame.getHeight() / 2 - this.getHeight() / 2 + mainFrame.getLocation().getY()));

@@ -36,6 +36,7 @@ import org.apache.log4j.Logger;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.shuishou.salemgr.CommonTools;
 import com.shuishou.salemgr.ConstantValue;
 import com.shuishou.salemgr.Messages;
 import com.shuishou.salemgr.beans.Goods;
@@ -221,7 +222,7 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 			member = HttpUtil.doLoadMember(PreorderQueryDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
 			//store into local memory
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
-			keyMap.put("member", member.getMemberCard() + "  score : "+ String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
+			keyMap.put("member", member.getMemberCard() + "  score : "+ CommonTools.transferDouble2Scale(member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
 		}else {
 			keyMap.put("member", "");
 			keyMap.put("discount", "");
@@ -229,7 +230,7 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 		keyMap.put("cashier", mainFrame.getOnDutyUser().getName());
 		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(new Date()));
 		keyMap.put("totalPrice", indent.getPaidPrice() + "");
-		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()/11));
+		keyMap.put("gst", CommonTools.transferNumberByPM(indent.getPaidPrice()/11, ""));
 		keyMap.put("payWay", indent.getPayWay());
 		keyMap.put("orderNo", indent.getIndentCode());
 		keyMap.put("getcash", "");
@@ -240,13 +241,13 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 			IndentDetail detail = indent.getItems().get(i);
 			Map<String, String> mg = new HashMap<String, String>();
 			mg.put("name", detail.getGoodsName());
-			mg.put("price", String.format(ConstantValue.FORMAT_DOUBLE, detail.getGoodsPrice()));
+			mg.put("price", CommonTools.transferNumberByPM(detail.getGoodsPrice(), ""));
 			mg.put("amount", detail.getAmount() + "");
-			mg.put("subTotal", String.format(ConstantValue.FORMAT_DOUBLE, detail.getAmount() * detail.getSoldPrice()));
+			mg.put("subTotal", CommonTools.transferNumberByPM(detail.getAmount() * detail.getSoldPrice(), ""));
 			goods.add(mg);
 			originPrice += detail.getGoodsPrice() * detail.getAmount();
 		}
-		keyMap.put("originPrice", String.format(ConstantValue.FORMAT_DOUBLE, originPrice));
+		keyMap.put("originPrice", CommonTools.transferNumberByPM(originPrice, ""));
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("keys", keyMap);
 		params.put("goods", goods);
@@ -282,15 +283,15 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 			Member member = HttpUtil.doLoadMember(this, mainFrame.getOnDutyUser(), indent.getMemberCard());
 			//store into local memory
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
-			keyMap.put("member", member.getMemberCard() + "  point : "+ String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
+			keyMap.put("member", member.getMemberCard() + "  point : "+ CommonTools.transferDouble2Scale(member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
 		}else {
 			keyMap.put("member", "");
 			keyMap.put("discount", "");
 		}
 		keyMap.put("cashier", indent.getOperator());
 		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(indent.getCreateTime()));
-		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE,indent.getPaidPrice()));
-		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()/11));
+		keyMap.put("totalPrice", CommonTools.transferNumberByPM(indent.getPaidPrice(), ""));
+		keyMap.put("gst", CommonTools.transferNumberByPM(indent.getPaidPrice()/11, ""));
 		if (indent.getIndentType() == ConstantValue.INDENT_TYPE_PREBUY_PAID){
 			keyMap.put("payWay", indent.getPayWay());
 		} else {
@@ -305,9 +306,9 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 			IndentDetail detail = indent.getItems().get(i);
 			Map<String, String> mg = new HashMap<String, String>();
 			mg.put("name", detail.getGoodsName());
-			mg.put("price", String.format(ConstantValue.FORMAT_DOUBLE, detail.getGoodsPrice()));
+			mg.put("price", CommonTools.transferNumberByPM(detail.getGoodsPrice(), ""));
 			mg.put("amount", detail.getAmount() + "");
-			mg.put("subTotal", String.format(ConstantValue.FORMAT_DOUBLE, detail.getSoldPrice() * detail.getAmount()));
+			mg.put("subTotal", CommonTools.transferNumberByPM(detail.getSoldPrice() * detail.getAmount(), ""));
 			goods.add(mg);
 		}
 		Map<String, Object> params = new HashMap<String, Object>();
@@ -343,13 +344,13 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 			GoodsItem gi = itValue.next();
 			Map<String, String> mg = new HashMap<String, String>();
 			mg.put("name", gi.goodsname);
-			mg.put("price", String.format(ConstantValue.FORMAT_DOUBLE, gi.price));
+			mg.put("price", CommonTools.transferNumberByPM(gi.price, ""));
 			mg.put("amount", gi.amount + "");
-			mg.put("total", String.format(ConstantValue.FORMAT_DOUBLE, gi.amount * gi.price));
+			mg.put("total", CommonTools.transferNumberByPM(gi.amount * gi.price, ""));
 			goods.add(mg);
 			totalPrice += gi.amount * gi.price;
 		}
-		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE, totalPrice));
+		keyMap.put("totalPrice", CommonTools.transferNumberByPM(totalPrice, ""));
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("keys", keyMap);
 		params.put("goods", goods);

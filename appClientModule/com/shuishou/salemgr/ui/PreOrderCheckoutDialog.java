@@ -39,6 +39,7 @@ import org.json.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.shuishou.salemgr.CommonTools;
 import com.shuishou.salemgr.ConstantValue;
 import com.shuishou.salemgr.Messages;
 import com.shuishou.salemgr.beans.DiscountTemplate;
@@ -100,8 +101,8 @@ public class PreOrderCheckoutDialog extends JDialog{
 		if (member != null){
 			lbMemberInfo.setText(Messages.getString("CheckoutDialog.MemberInfo.Name")+ member.getName() + ", " 
 				+ Messages.getString("CheckoutDialog.MemberInfo.DiscountRate") + member.getDiscountRate() + ", "
-				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + ", "
-				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + String.format(ConstantValue.FORMAT_DOUBLE, member.getBalanceMoney()));
+				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + CommonTools.transferDouble2Scale(member.getScore()) + ", "
+				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + CommonTools.transferDouble2Scale(member.getBalanceMoney()));
 		}
 		tfDiscountPrice = new NumberTextField(this, true, false);
 		
@@ -188,8 +189,8 @@ public class PreOrderCheckoutDialog extends JDialog{
 		
 		lbPrice.setFont(ConstantValue.FONT_25BOLD);
 		lbDiscountPrice.setFont(ConstantValue.FONT_25BOLD);
-		lbPrice.setText(Messages.getString("CheckoutDialog.Price") + String.format(ConstantValue.FORMAT_DOUBLE, sellPrice)); //$NON-NLS-1$
-		lbDiscountPrice.setText(Messages.getString("CheckoutDialog.DiscountPrice") + String.format(ConstantValue.FORMAT_DOUBLE, discountPrice)); //$NON-NLS-1$
+		lbPrice.setText(Messages.getString("CheckoutDialog.Price") + CommonTools.transferNumberByPM(sellPrice, "")); //$NON-NLS-1$
+		lbDiscountPrice.setText(Messages.getString("CheckoutDialog.DiscountPrice") + CommonTools.transferNumberByPM(discountPrice, "")); //$NON-NLS-1$
 		
 		Container c = this.getContentPane();
 		c.setLayout(new GridBagLayout());
@@ -343,14 +344,16 @@ public class PreOrderCheckoutDialog extends JDialog{
 			ChoosedGoods cg = choosedGoods.get(i);
 			jo.put("id", cg.goods.getId());
 			jo.put("amount", cg.amount);
-			if (member == null)
+			if (cg.modifiedPrice >= 0){
+				jo.put("soldPrice", cg.modifiedPrice);
+			} else if (member == null)
 				jo.put("soldPrice", cg.goods.getSellPrice());
 			else 
 				jo.put("soldPrice", String.format(ConstantValue.FORMAT_DOUBLE, cg.goods.getSellPrice() * member.getDiscountRate()));
 			ja.put(jo);
 		}
 		String url = "indent/prebuyindent";
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, String> params = new HashMap<>();
 		params.put("userId", mainFrame.getOnDutyUser().getId() + "");
 		params.put("indents", ja.toString());
 		if (member == null){
@@ -402,8 +405,8 @@ public class PreOrderCheckoutDialog extends JDialog{
 				getcash = Double.parseDouble(tfGetCash.getText());
 			}
 			JOptionPane.showMessageDialog(mainFrame, Messages.getString("CheckoutDialog.GetCash") + tfGetCash.getText()
-			+ "\n" + Messages.getString("CheckoutDialog.ShouldPayAmount") + String.format(ConstantValue.FORMAT_DOUBLE, discountPrice)
-			+ "\n" + Messages.getString("CheckoutDialog.Charge") + String.format(ConstantValue.FORMAT_DOUBLE, getcash - discountPrice));
+			+ "\n" + Messages.getString("CheckoutDialog.ShouldPayAmount") + CommonTools.transferNumberByPM(discountPrice, "")
+			+ "\n" + Messages.getString("CheckoutDialog.Charge") + CommonTools.transferNumberByPM(getcash - discountPrice, ""));
 		}
 	}
 	
@@ -415,15 +418,15 @@ public class PreOrderCheckoutDialog extends JDialog{
 			member = HttpUtil.doLoadMember(PreOrderCheckoutDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
 			//store into local memory
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
-			keyMap.put("member", member.getMemberCard() + "  point : "+ String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
+			keyMap.put("member", member.getMemberCard() + "  point : "+ CommonTools.transferDouble2Scale(member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
 		}else {
 			keyMap.put("member", "");
 			keyMap.put("discount", "");
 		}
 		keyMap.put("cashier", indent.getOperator());
 		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(indent.getCreateTime()));
-		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE,indent.getPaidPrice()));
-		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()/11));
+		keyMap.put("totalPrice", CommonTools.transferNumberByPM(indent.getPaidPrice(), ""));
+		keyMap.put("gst", CommonTools.transferNumberByPM(indent.getPaidPrice()/11, ""));
 		keyMap.put("orderNo", indent.getIndentCode());
 		if (paid){
 			keyMap.put("payWay", indent.getPayWay());
@@ -432,7 +435,7 @@ public class PreOrderCheckoutDialog extends JDialog{
 		}
 		if (rbPayCash.isSelected() && tfGetCash.getText() != null && tfGetCash.getText().length() > 0){
 			keyMap.put("getcash", "\\$" + tfGetCash.getText());
-			keyMap.put("change", "\\$" + String.format(ConstantValue.FORMAT_DOUBLE, Double.parseDouble(tfGetCash.getText()) - indent.getPaidPrice()));
+			keyMap.put("change", "\\$" + CommonTools.transferNumberByPM(Double.parseDouble(tfGetCash.getText()) - indent.getPaidPrice(), ""));
 		} else {
 			keyMap.put("getcash", "");
 			keyMap.put("change", "");
@@ -442,9 +445,9 @@ public class PreOrderCheckoutDialog extends JDialog{
 			IndentDetail detail = indent.getItems().get(i);
 			Map<String, String> mg = new HashMap<String, String>();
 			mg.put("name", detail.getGoodsName());
-			mg.put("price", String.format(ConstantValue.FORMAT_DOUBLE, detail.getGoodsPrice()));
+			mg.put("price", CommonTools.transferNumberByPM(detail.getGoodsPrice(), ""));
 			mg.put("amount", detail.getAmount() + "");
-			mg.put("subTotal", String.format(ConstantValue.FORMAT_DOUBLE, detail.getSoldPrice() * detail.getAmount()));
+			mg.put("subTotal", CommonTools.transferNumberByPM(detail.getSoldPrice() * detail.getAmount(), ""));
 			goods.add(mg);
 		}
 		Map<String, Object> params = new HashMap<String, Object>();

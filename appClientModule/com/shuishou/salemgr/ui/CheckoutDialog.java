@@ -29,6 +29,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -39,6 +41,7 @@ import org.json.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import com.shuishou.salemgr.CommonTools;
 import com.shuishou.salemgr.ConstantValue;
 import com.shuishou.salemgr.Messages;
 import com.shuishou.salemgr.beans.DiscountTemplate;
@@ -60,19 +63,18 @@ public class CheckoutDialog extends JDialog{
 	private MainFrame mainFrame;
 	
 	private JLabel lbDiscountPrice = new JLabel();
-	private JRadioButton rbPayCash = new JRadioButton(Messages.getString("CheckoutDialog.Cash"), true); //$NON-NLS-1$
-	private JRadioButton rbPayBankCard = new JRadioButton(Messages.getString("CheckoutDialog.BandCard"), false); //$NON-NLS-1$
+//	private JRadioButton rbPayCash = new JRadioButton(Messages.getString("CheckoutDialog.Cash"), true); //$NON-NLS-1$
+//	private JRadioButton rbPayBankCard = new JRadioButton(Messages.getString("CheckoutDialog.BandCard"), false); //$NON-NLS-1$
 //	private JRadioButton rbPayMember = new JRadioButton(Messages.getString("CheckoutDialog.MemberCard"), false); //$NON-NLS-1$
 	private JRadioButton rbDiscountNon = new JRadioButton(Messages.getString("CheckoutDialog.NoDiscount"), true); //$NON-NLS-1$
 	private JRadioButton rbDiscountTemp = new JRadioButton(Messages.getString("CheckoutDialog.TempDiscount"), false); //$NON-NLS-1$
 	private JRadioButton rbDiscountDirect = new JRadioButton(Messages.getString("CheckoutDialog.DirectDiscount"), false); //$NON-NLS-1$
-	private ArrayList<JRadioButton> listRBOtherPayway = new ArrayList<>();
+	private ArrayList<PaywayPanel> listPaywayPanel = new ArrayList<>();
 	private NumberTextField tfDiscountPrice = null;
-	private JBlockedButton btnPay = new JBlockedButton(Messages.getString("CheckoutDialog.PayButton"), "/resource/checkout.png"); //$NON-NLS-1$
-	private JButton btnClose = new JButton(Messages.getString("CloseDialog")); //$NON-NLS-1$
+	private JBlockedButton btnPay = new JBlockedButton(Messages.getString("CheckoutDialog.PayButton")+"[ENTER]", "/resource/checkout.png"); //$NON-NLS-1$
+	private JButton btnClose = new JButton(Messages.getString("CloseDialog")+"[ESC]"); //$NON-NLS-1$
 	private JButton btnCancelOrder = new JButton(Messages.getString("CheckoutDialog.CancelOrderButton")); //$NON-NLS-1$
-	private NumberTextField tfGetCash;
-	private JLabel lbChange;
+//	private NumberTextField tfGetCash;
 	private JLabel lbMemberInfo = new JLabel();
 	private double discountPrice = 0;
 	private double sellPrice = 0;
@@ -109,39 +111,38 @@ public class CheckoutDialog extends JDialog{
 		if (member != null){
 			lbMemberInfo.setText(Messages.getString("CheckoutDialog.MemberInfo.Name")+ member.getName() + ", " 
 				+ Messages.getString("CheckoutDialog.MemberInfo.DiscountRate") + member.getDiscountRate() + ", "
-				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) + ", "
-				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + String.format(ConstantValue.FORMAT_DOUBLE, member.getBalanceMoney()));
+				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + CommonTools.transferDouble2Scale(member.getScore()) + ", "
+				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + CommonTools.transferDouble2Scale(member.getBalanceMoney()));
 		}
 		tfDiscountPrice = new NumberTextField(this, true, false);
 		
-		tfGetCash = new NumberTextField(this, true, false);
-		JLabel lbGetCash = new JLabel(Messages.getString("CheckoutDialog.GetCash"));
-		lbChange = new JLabel();
+//		tfGetCash = new NumberTextField(this, true, false);
 		
 		JPanel pPayway = new JPanel(new GridBagLayout());
 		pPayway.setBorder(BorderFactory.createTitledBorder(Messages.getString("CheckoutDialog.PayWay"))); //$NON-NLS-1$
 		ButtonGroup bgPayway = new ButtonGroup();
-		bgPayway.add(rbPayCash);
-		bgPayway.add(rbPayBankCard);
+//		bgPayway.add(rbPayCash);
+//		bgPayway.add(rbPayBankCard);
 //		bgPayway.add(rbPayMember);
-		pPayway.add(rbPayCash, 		new GridBagConstraints(0, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		pPayway.add(lbGetCash, 		new GridBagConstraints(1, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 50, 0, 0), 0, 0));
-		pPayway.add(tfGetCash, 		new GridBagConstraints(2, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 20, 0, 0), 0, 0));
-		pPayway.add(lbChange, 		new GridBagConstraints(3, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
-		pPayway.add(rbPayBankCard, 	new GridBagConstraints(0, 1, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+//		pPayway.add(rbPayCash, 		new GridBagConstraints(0, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+//		pPayway.add(lbGetCash, 		new GridBagConstraints(1, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 50, 0, 0), 0, 0));
+//		pPayway.add(tfGetCash, 		new GridBagConstraints(2, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 20, 0, 0), 0, 0));
+//		pPayway.add(lbChange, 		new GridBagConstraints(3, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
+//		pPayway.add(rbPayBankCard, 	new GridBagConstraints(0, 1, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 //		pPayway.add(rbPayMember,	new GridBagConstraints(1, 1, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 50, 0, 0), 0, 0));
 //		pPayway.add(tfMember, 		new GridBagConstraints(2, 1, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10, 20, 0, 0), 0, 0));
 		if (!mainFrame.getPaywayList().isEmpty()){
-			JPanel pOtherPayway = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			pOtherPayway.setBorder(BorderFactory.createTitledBorder(Messages.getString("CheckoutDialog.OtherPayWay")));
 			for (int i = 0; i < mainFrame.getPaywayList().size(); i++) {
 				PayWay pw = mainFrame.getPaywayList().get(i);
-				JRadioButton rbpw = new JRadioButton(pw.getName());
-				bgPayway.add(rbpw);
-				pOtherPayway.add(rbpw);
-				listRBOtherPayway.add(rbpw);
+				PaywayPanel pp = new PaywayPanel(pw, sellPrice);
+				bgPayway.add(pp.getRadioButton());
+				if (i == 0){
+					pp.setSelected(true);
+				}
+				listPaywayPanel.add(pp);
+				pPayway.add(pp, new GridBagConstraints(0, i, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10, 0, 0, 0), 0, 0));
 			}
-			pPayway.add(pOtherPayway, new GridBagConstraints(0, 3, 4, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10, 0, 0, 0), 0, 0));
+			
 		}
 		JPanel pDiscountTemplate = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 5));
 		pDiscountTemplate.setBorder(BorderFactory.createTitledBorder(Messages.getString("CheckoutDialog.DiscountTemplateBorderTitle")));
@@ -198,8 +199,8 @@ public class CheckoutDialog extends JDialog{
 		lbMember.setFont(ConstantValue.FONT_25BOLD);
 		lbPrice.setFont(ConstantValue.FONT_25BOLD);
 		lbDiscountPrice.setFont(ConstantValue.FONT_25BOLD);
-		lbPrice.setText(Messages.getString("CheckoutDialog.Price") + String.format(ConstantValue.FORMAT_DOUBLE, sellPrice)); //$NON-NLS-1$
-		lbDiscountPrice.setText(Messages.getString("CheckoutDialog.DiscountPrice") + String.format(ConstantValue.FORMAT_DOUBLE, discountPrice)); //$NON-NLS-1$
+		lbPrice.setText(Messages.getString("CheckoutDialog.Price") + CommonTools.transferNumberByPM(sellPrice, "")); //$NON-NLS-1$
+		lbDiscountPrice.setText(Messages.getString("CheckoutDialog.DiscountPrice") + CommonTools.transferNumberByPM(discountPrice, "")); //$NON-NLS-1$
 		
 		Container c = this.getContentPane();
 		c.setLayout(new GridBagLayout());
@@ -210,7 +211,7 @@ public class CheckoutDialog extends JDialog{
 		c.add(lbDiscountPrice, 	new GridBagConstraints(0, 5, 1, 1, 1, 0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		c.add(pButton, 			new GridBagConstraints(0, 6, 3, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
 		
-		this.setSize(new Dimension(750, 700));
+		this.setSize(new Dimension(750, 750));
 		this.setLocation((int)(mainFrame.getWidth() / 2 - this.getWidth() /2 + mainFrame.getLocation().getX()), 
 				(int)(mainFrame.getHeight() / 2 - this.getHeight() / 2 + mainFrame.getLocation().getY()));
 		
@@ -237,25 +238,25 @@ public class CheckoutDialog extends JDialog{
 				mainFrame.clearTable();
 			}});
 		
-		tfGetCash.getDocument().addDocumentListener(new DocumentListener(){
-			
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				rbPayCash.setSelected(true);
-				showChargeText();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				rbPayCash.setSelected(true);
-				showChargeText();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				rbPayCash.setSelected(true);
-				showChargeText();
-			}});
+//		tfGetCash.getDocument().addDocumentListener(new DocumentListener(){
+//			
+//			@Override
+//			public void insertUpdate(DocumentEvent e) {
+//				rbPayCash.setSelected(true);
+//				showChargeText();
+//			}
+//
+//			@Override
+//			public void removeUpdate(DocumentEvent e) {
+//				rbPayCash.setSelected(true);
+//				showChargeText();
+//			}
+//
+//			@Override
+//			public void changedUpdate(DocumentEvent e) {
+//				rbPayCash.setSelected(true);
+//				showChargeText();
+//			}});
 		tfDiscountPrice.getDocument().addDocumentListener(new DocumentListener(){
 
 			@Override
@@ -307,16 +308,16 @@ public class CheckoutDialog extends JDialog{
 	}
 	
 	private void showChargeText(){
-		if (!rbPayCash.isSelected())
-			return;
-		if (tfGetCash.getText() == null || tfGetCash.getText().length() == 0){
-			lbChange.setText("");
-			return;
-		}
-		double value = Double.parseDouble(tfGetCash.getText());
-		if (value < discountPrice)
-			return;
-		lbChange.setText(Messages.getString("CheckoutDialog.Charge")+" $" + String.format("%.2f", value - discountPrice));
+//		if (!rbPayCash.isSelected())
+//			return;
+//		if (tfGetCash.getText() == null || tfGetCash.getText().length() == 0){
+//			lbChange.setText("");
+//			return;
+//		}
+//		double value = Double.parseDouble(tfGetCash.getText());
+//		if (value < discountPrice)
+//			return;
+//		lbChange.setText(Messages.getString("CheckoutDialog.Charge")+" $" + String.format("%.2f", value - discountPrice));
 	}
 	
 	private DiscountTemplateRadioButton getSelectedDiscountTemplateRadioButton(){
@@ -349,8 +350,30 @@ public class CheckoutDialog extends JDialog{
 		showChargeText();
 	}
 	
+	private PayWay getChoosedPayWay(){
+		for(PaywayPanel pp : listPaywayPanel){
+			if (pp.getRadioButton().isSelected())
+				return pp.payway;
+		}
+		return null;
+	}
+	
+	private PaywayPanel getChoosedPayWayPanel(){
+		for(PaywayPanel pp : listPaywayPanel){
+			if (pp.getRadioButton().isSelected())
+				return pp;
+		}
+		return null;
+	}
+	
+	/**
+	 * seperate the list by amount; if amount > 0, think it as order, otherwise think it as refund
+	 */
 	public void doPay(){
-		JSONArray ja = new JSONArray();
+		boolean existingOrder = false;
+		boolean existingRefund = false;
+		JSONArray ja_order = new JSONArray();//订单
+		JSONArray ja_refund = new JSONArray();//退单
 		for (int i = 0; i< choosedGoods.size(); i++) {
 			JSONObject jo = new JSONObject();
 			ChoosedGoods cg = choosedGoods.get(i);
@@ -362,60 +385,94 @@ public class CheckoutDialog extends JDialog{
 				jo.put("soldPrice", cg.goods.getSellPrice());
 			else if (member != null)
 				jo.put("soldPrice", String.format(ConstantValue.FORMAT_DOUBLE, cg.goods.getSellPrice() * member.getDiscountRate()));
-			ja.put(jo);
+			if (cg.amount > 0){
+				ja_order.put(jo);
+				existingOrder = true;
+			} else if (cg.amount < 0){
+				ja_refund.put(jo);
+				existingRefund = true;
+			}
 		}
-		String url = "indent/makeindent";
+		
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("userId", mainFrame.getOnDutyUser().getId() + "");
-		params.put("indents", ja.toString());
+		
 		if (member !=null)
 			params.put("member", member.getMemberCard());
 		else
 			params.put("member", "");
 		params.put("paidPrice", discountPrice + "");
-		if (rbPayCash.isSelected()){
-			params.put("payWay", ConstantValue.INDENT_PAYWAY_CASH);
-		} else if (rbPayBankCard.isSelected()){
-			params.put("payWay", ConstantValue.INDENT_PAYWAY_BANKCARD);
+		PayWay payway = getChoosedPayWay();
+		if (payway == null){
+			JOptionPane.showMessageDialog(this, "Must choose a way for payment.");
+			return;
 		} else {
-			for(JRadioButton rb : listRBOtherPayway){
-				if (rb.isSelected()){
-					params.put("payWay", rb.getText());
-					break;
-				}
+			params.put("payWay", payway.getName());
+		}
+		Indent indent = null;//use this indent to collect all of the indent.items
+		if (existingOrder){
+			String url = "indent/makeindent";
+			params.put("indents", ja_order.toString());
+			String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
+			if (response == null){
+				logger.error("get null from server for doing pay. URL = " + url);
+				JOptionPane.showMessageDialog(this, "get null from server for doing pay. URL = " + url);
+				return;
+			}
+			Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+			HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
+			if (!result.success){
+				logger.error("return false while doing pay. URL = " + url + ", response = "+response);
+				JOptionPane.showMessageDialog(this, "return false while doing pay. URL = " + url + ", response = "+response);
+				return;
+			}
+			if (indent == null){
+				indent = result.data;
+			} else {
+				indent.getItems().addAll(result.data.getItems());
 			}
 		}
-		String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
-		if (response == null){
-			logger.error("get null from server for doing pay. URL = " + url);
-			JOptionPane.showMessageDialog(this, "get null from server for doing pay. URL = " + url);
-			return;
-		}
-		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
-		HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
-		if (!result.success){
-			logger.error("return false while doing pay. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(this, "return false while doing pay. URL = " + url + ", response = "+response);
-			return;
+		if (existingRefund){
+			String url = "indent/refundindent";
+			params.put("indents", ja_refund.toString());
+			params.put("returnToStorage", String.valueOf(true));
+			params.put("refundPrice", "");
+			String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
+			if (response == null){
+				logger.error("get null from server for doing refund. URL = " + url);
+				JOptionPane.showMessageDialog(this, "get null from server for doing refund. URL = " + url);
+				return;
+			}
+			Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+			HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
+			if (!result.success){
+				logger.error("return false while doing refund. URL = " + url + ", response = "+response);
+				JOptionPane.showMessageDialog(this, "return false while doing refund. URL = " + url + ", response = "+response);
+				return;
+			}
+			if (indent == null){
+				indent = result.data;
+			} else {
+				indent.getItems().addAll(result.data.getItems());
+			}
 		}
 		
 		//print ticket
-		doPrintTicket(result.data);
+		if (indent != null)
+			doPrintTicket(indent);
+		
 		//clean table data
 		mainFrame.clearTable();
 		CheckoutDialog.this.setVisible(false);
 //		if (rbPayCash.isSelected()){
-//			mainFrame.doOpenCashdrawer(false);
+//			double getcash = 0;
+//			if (tfGetCash.getText() != null && tfGetCash.getText().length() !=0){
+//				getcash = Double.parseDouble(tfGetCash.getText());
+//			}
+//			JOptionPane.showMessageDialog(mainFrame, Messages.getString("CheckoutDialog.GetCash") + tfGetCash.getText()
+//			+ "\n" + Messages.getString("CheckoutDialog.ShouldPayAmount") + CommonTools.transferNumberByPM(discountPrice, "")
+//			+ "\n" + Messages.getString("CheckoutDialog.Charge") + CommonTools.transferNumberByPM(getcash - discountPrice, ""));
 //		}
-		if (rbPayCash.isSelected()){
-			double getcash = 0;
-			if (tfGetCash.getText() != null && tfGetCash.getText().length() !=0){
-				getcash = Double.parseDouble(tfGetCash.getText());
-			}
-			JOptionPane.showMessageDialog(mainFrame, Messages.getString("CheckoutDialog.GetCash") + tfGetCash.getText()
-			+ "\n" + Messages.getString("CheckoutDialog.ShouldPayAmount") + String.format(ConstantValue.FORMAT_DOUBLE, discountPrice)
-			+ "\n" + Messages.getString("CheckoutDialog.Charge") + String.format(ConstantValue.FORMAT_DOUBLE, getcash - discountPrice));
-		}
 	}
 	
 	private void doPrintTicket(Indent indent){
@@ -425,37 +482,33 @@ public class CheckoutDialog extends JDialog{
 			member = HttpUtil.doLoadMember(CheckoutDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
 			//store into local memory
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
-			keyMap.put("member", member.getMemberCard() + ", points: " + String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) 
+			keyMap.put("member", member.getMemberCard() + ", points: " + CommonTools.transferDouble2Scale(member.getScore()) 
 				+ ", discount: " + (member.getDiscountRate() * 100) + "%");
 		}else {
 			keyMap.put("member", "");
 		}
 		keyMap.put("cashier", indent.getOperator());
 		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(indent.getCreateTime()));
-		keyMap.put("totalPrice", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()));
-		keyMap.put("gst", String.format(ConstantValue.FORMAT_DOUBLE, indent.getPaidPrice()/11));
+		keyMap.put("totalPrice", CommonTools.transferNumberByPM(indent.getPaidPrice(), ""));
+		keyMap.put("gst", CommonTools.transferNumberByPM(indent.getPaidPrice()/11, ""));
 		keyMap.put("payWay", indent.getPayWay());
 		keyMap.put("orderNo", indent.getIndentCode());
-		if (rbPayCash.isSelected() && tfGetCash.getText() != null && tfGetCash.getText().length() > 0){
-			keyMap.put("getcash", "\\$" + tfGetCash.getText());
-			keyMap.put("change", "\\$" + String.format(ConstantValue.FORMAT_DOUBLE, Double.parseDouble(tfGetCash.getText()) - indent.getPaidPrice()));
-		} else {
-			keyMap.put("getcash", "");
-			keyMap.put("change", "");
-		}
+		PaywayPanel paywayPanel = getChoosedPayWayPanel();
+		keyMap.put("getcash", paywayPanel.getMoneyAmount()+"");
+		keyMap.put("change", CommonTools.transferDouble2Scale(paywayPanel.getChangeAmount()));
 		double originPrice = 0;
 		List<Map<String, String>> goods = new ArrayList<>();
 		for (int i = 0; i< indent.getItems().size(); i++) {
 			IndentDetail detail = indent.getItems().get(i);
 			Map<String, String> mg = new HashMap<String, String>();
 			mg.put("name", detail.getGoodsName());
-			mg.put("price", String.format(ConstantValue.FORMAT_DOUBLE, detail.getGoodsPrice()));
+			mg.put("price", CommonTools.transferNumberByPM(detail.getGoodsPrice(), ""));
 			mg.put("amount", detail.getAmount() + "");
-			mg.put("subTotal", String.format(ConstantValue.FORMAT_DOUBLE, detail.getSoldPrice() * detail.getAmount()));
+			mg.put("subTotal", CommonTools.transferNumberByPM(detail.getSoldPrice() * detail.getAmount(), ""));
 			originPrice += detail.getGoodsPrice() * detail.getAmount();
 			goods.add(mg);
 		}
-		keyMap.put("originPrice", String.format(ConstantValue.FORMAT_DOUBLE, originPrice));
+		keyMap.put("originPrice", CommonTools.transferNumberByPM(originPrice, ""));
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("keys", keyMap);
 		params.put("goods", goods);
@@ -478,6 +531,122 @@ public class CheckoutDialog extends JDialog{
 		}
 		public void setDiscountTemplate(DiscountTemplate temp) {
 			this.temp = temp;
+		}
+	}
+	
+	class PaywayPanel extends JPanel{
+		private JLabel lbShouldPay = new JLabel();
+		private JLabel lbChange = new JLabel();
+		private NumberTextField tfGetPay = new NumberTextField((JDialog)null, true, false);
+		private JRadioButton rbName;
+		private PayWay payway;
+		private double orderPrice;
+		public PaywayPanel(PayWay payway, double orderPrice){
+			this.payway = payway;
+			this.orderPrice = orderPrice;
+			rbName = new JRadioButton(payway.getName());
+			tfGetPay.setPreferredSize(new Dimension(120, 35));
+			tfGetPay.setMaximumSize(new Dimension(120,35));
+			tfGetPay.setMinimumSize(new Dimension(120, 35));
+			
+			lbShouldPay.setPreferredSize(new Dimension(150, 35));
+			lbShouldPay.setMaximumSize(new Dimension(150,35));
+			lbShouldPay.setMinimumSize(new Dimension(150, 35));
+			
+			lbChange.setPreferredSize(new Dimension(120, 35));
+			lbChange.setMaximumSize(new Dimension(120,35));
+			lbChange.setMinimumSize(new Dimension(120, 35));
+			
+			lbShouldPay.setText("Needs " + CommonTools.transferDouble2Scale(orderPrice * payway.getRate()));
+			tfGetPay.setText(CommonTools.transferDouble2Scale(orderPrice * payway.getRate()));
+			tfGetPay.selectAll();
+			rbName.setSelected(false);
+			lbShouldPay.setVisible(false);
+			lbChange.setVisible(false);
+			tfGetPay.setVisible(false);
+			this.setLayout(new GridBagLayout());
+			add(rbName, 		new GridBagConstraints(0, 0, 1, 1, 0.1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+			add(lbShouldPay, 	new GridBagConstraints(1, 0, 1, 1, 0.4, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
+			add(tfGetPay, 		new GridBagConstraints(2, 0, 1, 1, 0.1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 20, 0, 0), 0, 0));
+			add(lbChange, 		new GridBagConstraints(3, 0, 1, 1, 0.4, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
+			
+			rbName.addChangeListener(new ChangeListener(){
+
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					rbName.setSelected(rbName.isSelected());
+					lbShouldPay.setVisible(rbName.isSelected());
+					lbChange.setVisible(rbName.isSelected());
+					tfGetPay.setVisible(rbName.isSelected());
+					if (rbName.isSelected()){
+						setBorder(BorderFactory.createLineBorder(Color.lightGray));
+					} else {
+						setBorder(null);
+					}
+						
+				}});
+			
+			tfGetPay.getDocument().addDocumentListener(new DocumentListener() {
+
+				@Override
+				public void insertUpdate(DocumentEvent e) {
+					showChangeText();
+				}
+
+				@Override
+				public void removeUpdate(DocumentEvent e) {
+					showChangeText();
+				}
+
+				@Override
+				public void changedUpdate(DocumentEvent e) {
+					showChangeText();
+				}
+			});
+		}
+		
+		private void showChangeText(){
+			if (tfGetPay.getText() == null || tfGetPay.getText().length() == 0)
+				return;
+			double value = Double.parseDouble(tfGetPay.getText());
+			if (value < orderPrice)
+				return;
+			lbChange.setText(Messages.getString("CheckoutDialog.Charge") + CommonTools.transferDouble2Scale(value - orderPrice));
+		}
+		
+		public void setSelected(boolean b){
+			rbName.setSelected(b);
+			lbShouldPay.setVisible(b);
+			lbChange.setVisible(b);
+			tfGetPay.setVisible(b);
+			if (b){
+				this.setBorder(BorderFactory.createLineBorder(Color.lightGray));
+			} else {
+				this.setBorder(null);
+			}
+		}
+		
+		public void setGetPayValue(String s){
+			tfGetPay.setText(s);
+			tfGetPay.requestFocusInWindow();
+			tfGetPay.selectAll();
+		}
+		
+		public JRadioButton getRadioButton(){
+			return rbName;
+		}
+		
+		public double getMoneyAmount(){
+			if (tfGetPay.getText() == null || tfGetPay.getText().length() == 0)
+				return 0;
+			else return Double.parseDouble(tfGetPay.getText());
+		}
+		
+		public double getChangeAmount(){
+			if (tfGetPay.getText() == null || tfGetPay.getText().length() == 0)
+				return 0;
+			double value = Double.parseDouble(tfGetPay.getText());
+			return value / payway.getRate() - orderPrice;
 		}
 	}
 }

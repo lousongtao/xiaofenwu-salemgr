@@ -6,6 +6,7 @@ import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableModel;
 
+import com.shuishou.salemgr.CommonTools;
 import com.shuishou.salemgr.ConstantValue;
 import com.shuishou.salemgr.Messages;
 import com.shuishou.salemgr.beans.Member;
@@ -55,7 +56,7 @@ public class GoodsTableModel extends DefaultTableModel{
 			return cg.goods.getSellPrice();
 		case 4:
 			if (member != null){
-				return String.format(ConstantValue.FORMAT_DOUBLE, member.getDiscountRate() * cg.goods.getSellPrice());
+				return CommonTools.transferNumberByPM(member.getDiscountRate() * cg.goods.getSellPrice(), "");
 			}
 			return "";
 		case 5:
