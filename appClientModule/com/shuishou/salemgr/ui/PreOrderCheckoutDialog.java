@@ -51,22 +51,21 @@ import com.shuishou.salemgr.beans.PayWay;
 import com.shuishou.salemgr.http.HttpUtil;
 import com.shuishou.salemgr.printertool.PrintJob;
 import com.shuishou.salemgr.printertool.PrintQueue;
+import com.shuishou.salemgr.ui.components.CommonDialog;
 import com.shuishou.salemgr.ui.components.JBlockedButton;
 import com.shuishou.salemgr.ui.components.NumberTextField;
 import com.shuishou.salemgr.ui.uibean.ChoosedGoods;
 
-public class PreOrderCheckoutDialog extends JDialog{
+public class PreOrderCheckoutDialog extends CommonDialog{
 	private final Logger logger = Logger.getLogger(PreOrderCheckoutDialog.class.getName());
 	private MainFrame mainFrame;
 	
 	private JLabel lbDiscountPrice = new JLabel();
-	private JRadioButton rbPayCash = new JRadioButton(Messages.getString("CheckoutDialog.Cash"), true); //$NON-NLS-1$
-	private JRadioButton rbPayBankCard = new JRadioButton(Messages.getString("CheckoutDialog.BandCard"), false); //$NON-NLS-1$
-//	private JRadioButton rbPayMember = new JRadioButton(Messages.getString("CheckoutDialog.MemberCard"), false); //$NON-NLS-1$
 	private JRadioButton rbDiscountNon = new JRadioButton(Messages.getString("CheckoutDialog.NoDiscount"), true); //$NON-NLS-1$
 	private JRadioButton rbDiscountTemp = new JRadioButton(Messages.getString("CheckoutDialog.TempDiscount"), false); //$NON-NLS-1$
 	private JRadioButton rbDiscountDirect = new JRadioButton(Messages.getString("CheckoutDialog.DirectDiscount"), false); //$NON-NLS-1$
 	private ArrayList<JRadioButton> listRBOtherPayway = new ArrayList<>();
+	private ArrayList<PaywayPanel> listPaywayPanel = new ArrayList<>();
 	private NumberTextField tfDiscountPrice = null;
 	private JBlockedButton btnPay = new JBlockedButton(Messages.getString("CheckoutDialog.PayButton"), "/resource/checkout.png"); //$NON-NLS-1$
 	private JButton btnClose = new JButton(Messages.getString("CloseDialog")); //$NON-NLS-1$
@@ -87,10 +86,18 @@ public class PreOrderCheckoutDialog extends JDialog{
 		this.member = m;
 		this.choosedGoods = choosedGoods;
 		for(ChoosedGoods cg : choosedGoods){
-			sellPrice += cg.amount * cg.goods.getSellPrice(); 
+			/**
+			 * if modifiedPrice >= 0, then use the modifiedPrice;
+			 * else if member != null, then use the member discount price;
+			 * else use the goods.sellPrice.
+			 */
+			if (cg.modifiedPrice >= 0)
+				sellPrice += cg.modifiedPrice * cg.amount;
+			else if (member != null)
+				sellPrice += cg.goods.getSellPrice() * member.getDiscountRate() * cg.amount;
+			else 
+				sellPrice += cg.goods.getSellPrice() * cg.amount;
 		}
-		if (member != null)
-			sellPrice *= member.getDiscountRate();
 		discountPrice = sellPrice;
 		initUI();
 	}
@@ -113,27 +120,18 @@ public class PreOrderCheckoutDialog extends JDialog{
 		JPanel pPayway = new JPanel(new GridBagLayout());
 		pPayway.setBorder(BorderFactory.createTitledBorder(Messages.getString("CheckoutDialog.PayWay"))); //$NON-NLS-1$
 		ButtonGroup bgPayway = new ButtonGroup();
-		bgPayway.add(rbPayCash);
-		bgPayway.add(rbPayBankCard);
-//		bgPayway.add(rbPayMember);
-		pPayway.add(rbPayCash, 		new GridBagConstraints(0, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-		pPayway.add(lbGetCash, 		new GridBagConstraints(1, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 50, 0, 0), 0, 0));
-		pPayway.add(tfGetCash, 	new GridBagConstraints(2, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 20, 0, 0), 0, 0));
-		pPayway.add(lbChange, 		new GridBagConstraints(3, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
-		pPayway.add(rbPayBankCard, 	new GridBagConstraints(0, 1, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-//		pPayway.add(rbPayMember,	new GridBagConstraints(1, 1, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 50, 0, 0), 0, 0));
-//		pPayway.add(tfMember, 		new GridBagConstraints(2, 1, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10, 20, 0, 0), 0, 0));
 		if (!mainFrame.getPaywayList().isEmpty()){
-			JPanel pOtherPayway = new JPanel(new FlowLayout(FlowLayout.LEFT));
-			pOtherPayway.setBorder(BorderFactory.createTitledBorder(Messages.getString("CheckoutDialog.OtherPayWay")));
 			for (int i = 0; i < mainFrame.getPaywayList().size(); i++) {
 				PayWay pw = mainFrame.getPaywayList().get(i);
-				JRadioButton rbpw = new JRadioButton(pw.getName());
-				bgPayway.add(rbpw);
-				pOtherPayway.add(rbpw);
-				listRBOtherPayway.add(rbpw);
+				PaywayPanel pp = new PaywayPanel(pw, sellPrice);
+				bgPayway.add(pp.getRadioButton());
+				if (i == 0){
+					pp.setSelected(true);
+				}
+				listPaywayPanel.add(pp);
+				pPayway.add(pp, new GridBagConstraints(0, i, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10, 0, 0, 0), 0, 0));
 			}
-			pPayway.add(pOtherPayway, new GridBagConstraints(0, 3, 4, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10, 0, 0, 0), 0, 0));
+			
 		}
 		JPanel pDiscountTemplate = new JPanel(new FlowLayout(FlowLayout.LEFT, 20, 5));
 		pDiscountTemplate.setBorder(BorderFactory.createTitledBorder(Messages.getString("CheckoutDialog.DiscountTemplateBorderTitle")));
@@ -227,25 +225,6 @@ public class PreOrderCheckoutDialog extends JDialog{
 				doMakePreOrder(false);
 			}});
 		
-		tfGetCash.getDocument().addDocumentListener(new DocumentListener(){
-			
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				rbPayCash.setSelected(true);
-				showChargeText();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				rbPayCash.setSelected(true);
-				showChargeText();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				rbPayCash.setSelected(true);
-				showChargeText();
-			}});
 		tfDiscountPrice.getDocument().addDocumentListener(new DocumentListener(){
 
 			@Override
@@ -294,18 +273,6 @@ public class PreOrderCheckoutDialog extends JDialog{
 		});
 	}
 	
-	private void showChargeText(){
-		if (!rbPayCash.isSelected())
-			return;
-		if (tfGetCash.getText() == null || tfGetCash.getText().length() == 0){
-			lbChange.setText("");
-			return;
-		}
-		double value = Double.parseDouble(tfGetCash.getText());
-		if (value < discountPrice)
-			return;
-		lbChange.setText(Messages.getString("CheckoutDialog.Charge")+" $" + String.format("%.2f", value - discountPrice));
-	}
 	
 	private DiscountTemplateRadioButton getSelectedDiscountTemplateRadioButton(){
 		for (DiscountTemplateRadioButton rb : discountTempRadioButtonList) {
@@ -334,7 +301,22 @@ public class PreOrderCheckoutDialog extends JDialog{
 		}
 		
 		lbDiscountPrice.setText(Messages.getString("CheckoutDialog.DiscountPrice") + new DecimalFormat("0.00").format(discountPrice)); //$NON-NLS-1$
-		showChargeText();
+	}
+	
+	private PayWay getChoosedPayWay(){
+		for(PaywayPanel pp : listPaywayPanel){
+			if (pp.getRadioButton().isSelected())
+				return pp.getPayway();
+		}
+		return null;
+	}
+	
+	private PaywayPanel getChoosedPayWayPanel(){
+		for(PaywayPanel pp : listPaywayPanel){
+			if (pp.getRadioButton().isSelected())
+				return pp;
+		}
+		return null;
 	}
 	
 	public void doMakePreOrder(boolean paid){
@@ -362,17 +344,12 @@ public class PreOrderCheckoutDialog extends JDialog{
 			params.put("member", member.getMemberCard());
 		}
 		params.put("paidPrice", discountPrice + "");
-		if (rbPayCash.isSelected()) {
-			params.put("payWay", ConstantValue.INDENT_PAYWAY_CASH);
-		} else if (rbPayBankCard.isSelected()) {
-			params.put("payWay", ConstantValue.INDENT_PAYWAY_BANKCARD);
+		PayWay payway = getChoosedPayWay();
+		if (payway == null){
+			JOptionPane.showMessageDialog(this, "Must choose a way for payment.");
+			return;
 		} else {
-			for (JRadioButton rb : listRBOtherPayway) {
-				if (rb.isSelected()) {
-					params.put("payWay", rb.getText());
-					break;
-				}
-			}
+			params.put("payWay", payway.getName());
 		}
 		if (!paid)
 			params.put("payWay", "");
@@ -384,7 +361,7 @@ public class PreOrderCheckoutDialog extends JDialog{
 			JOptionPane.showMessageDialog(this, "get null from server for doing pay. URL = " + url);
 			return;
 		}
-		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		Gson gson = new GsonBuilder().setDateFormat(ConstantValue.DATE_PATTERN_YMDHMS).create();
 		HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while doing pay. URL = " + url + ", response = "+response);
@@ -396,20 +373,7 @@ public class PreOrderCheckoutDialog extends JDialog{
 		//clean table data
 		mainFrame.clearTable();
 		PreOrderCheckoutDialog.this.setVisible(false);
-//		if (rbPayCash.isSelected()){
-//			mainFrame.doOpenCashdrawer(false);
-//		}
-		if (paid && rbPayCash.isSelected()){
-			double getcash = 0;
-			if (tfGetCash.getText() != null && tfGetCash.getText().length() !=0){
-				getcash = Double.parseDouble(tfGetCash.getText());
-			}
-			JOptionPane.showMessageDialog(mainFrame, Messages.getString("CheckoutDialog.GetCash") + tfGetCash.getText()
-			+ "\n" + Messages.getString("CheckoutDialog.ShouldPayAmount") + CommonTools.transferNumberByPM(discountPrice, "")
-			+ "\n" + Messages.getString("CheckoutDialog.Charge") + CommonTools.transferNumberByPM(getcash - discountPrice, ""));
-		}
 	}
-	
 	
 	private void doPrintTicket(boolean paid, Indent indent){
 		Map<String,String> keyMap = new HashMap<String, String>();
@@ -433,13 +397,9 @@ public class PreOrderCheckoutDialog extends JDialog{
 		} else {
 			keyMap.put("payWay", "Unpaid");
 		}
-		if (rbPayCash.isSelected() && tfGetCash.getText() != null && tfGetCash.getText().length() > 0){
-			keyMap.put("getcash", "\\$" + tfGetCash.getText());
-			keyMap.put("change", "\\$" + CommonTools.transferNumberByPM(Double.parseDouble(tfGetCash.getText()) - indent.getPaidPrice(), ""));
-		} else {
-			keyMap.put("getcash", "");
-			keyMap.put("change", "");
-		}
+		PaywayPanel paywayPanel = getChoosedPayWayPanel();
+		keyMap.put("getcash", paywayPanel.getMoneyAmount()+"");
+		keyMap.put("change", CommonTools.transferDouble2Scale(paywayPanel.getChangeAmount()));
 		List<Map<String, String>> goods = new ArrayList<>();
 		for (int i = 0; i< indent.getItems().size(); i++) {
 			IndentDetail detail = indent.getItems().get(i);

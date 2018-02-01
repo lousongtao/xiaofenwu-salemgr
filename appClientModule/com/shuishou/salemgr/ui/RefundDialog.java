@@ -50,11 +50,12 @@ import com.shuishou.salemgr.beans.PayWay;
 import com.shuishou.salemgr.http.HttpUtil;
 import com.shuishou.salemgr.printertool.PrintJob;
 import com.shuishou.salemgr.printertool.PrintQueue;
+import com.shuishou.salemgr.ui.components.CommonDialog;
 import com.shuishou.salemgr.ui.components.JBlockedButton;
 import com.shuishou.salemgr.ui.components.NumberTextField;
 import com.shuishou.salemgr.ui.uibean.ChoosedGoods;
 
-public class RefundDialog extends JDialog{
+public class RefundDialog extends CommonDialog{
 	private final Logger logger = Logger.getLogger(RefundDialog.class.getName());
 	private MainFrame mainFrame;
 	
@@ -176,7 +177,7 @@ public class RefundDialog extends JDialog{
 			JOptionPane.showMessageDialog(this, "get null from server for doing refund. URL = " + url);
 			return;
 		}
-		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		Gson gson = new GsonBuilder().setDateFormat(ConstantValue.DATE_PATTERN_YMDHMS).create();
 		HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while doing refund. URL = " + url + ", response = "+response);

@@ -15,9 +15,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.shuishou.salemgr.beans.Goods;
+import com.shuishou.salemgr.ui.components.CommonDialog;
 import com.shuishou.salemgr.ui.components.NumberTextField;
 
-public class ChangeGoodsPriceDialog extends JDialog implements ActionListener{
+public class ChangeGoodsPriceDialog extends CommonDialog implements ActionListener{
 	
 	private MainFrame mainFrame;
 	private Goods goods;

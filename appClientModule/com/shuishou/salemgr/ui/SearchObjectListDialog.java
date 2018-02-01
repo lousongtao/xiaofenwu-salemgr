@@ -19,8 +19,9 @@ import javax.swing.table.AbstractTableModel;
 
 import com.shuishou.salemgr.Messages;
 import com.shuishou.salemgr.beans.Goods;
+import com.shuishou.salemgr.ui.components.CommonDialog;
 
-public class SearchObjectListDialog extends JDialog{
+public class SearchObjectListDialog extends CommonDialog{
 
 	private Goods choosedGoods;
 	private JTable table = new JTable();

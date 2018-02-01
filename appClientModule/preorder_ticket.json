@@ -120,7 +120,7 @@
 		"type": 0
 	},
 	{
-		"text": "Cash:                      {$getcash}",
+		"text": "Paid:                      {$getcash}",
 		"size": 9,
 		"bold": false,
 		"align": 0,

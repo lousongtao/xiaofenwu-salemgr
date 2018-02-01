@@ -24,13 +24,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.shuishou.salemgr.ConstantValue;
+import com.shuishou.salemgr.Messages;
 import com.shuishou.salemgr.beans.HttpResult;
 import com.shuishou.salemgr.beans.Member;
 import com.shuishou.salemgr.http.HttpUtil;
+import com.shuishou.salemgr.ui.components.CommonDialog;
 import com.shuishou.salemgr.ui.components.JDatePicker;
 import com.shuishou.salemgr.ui.components.NumberTextField;
 
-public class MemberDialog extends JDialog{
+public class MemberDialog extends CommonDialog{
 
 	private final Logger logger = Logger.getLogger(MemberDialog.class.getName());
 	private JTextField tfName= new JTextField(155);
@@ -53,13 +55,13 @@ public class MemberDialog extends JDialog{
 	}
 	
 	private void initUI(){
-		JLabel lbName = new JLabel("Name");
-		JLabel lbMemberCard = new JLabel("Member Card");
-		JLabel lbTelephone = new JLabel("Telephone");
-		JLabel lbAddress = new JLabel("Address");
-		JLabel lbPostcode = new JLabel("Postcode");
-		JLabel lbBirthday = new JLabel("Birthday");
-		JLabel lbDiscountRate = new JLabel("Discount Rate");
+		JLabel lbName = new JLabel(Messages.getString("MemberDialog.Name"));
+		JLabel lbMemberCard = new JLabel(Messages.getString("MemberDialog.MemberCard"));
+		JLabel lbTelephone = new JLabel(Messages.getString("MemberDialog.Telephone"));
+		JLabel lbAddress = new JLabel(Messages.getString("MemberDialog.Address"));
+		JLabel lbPostcode = new JLabel(Messages.getString("MemberDialog.Postcode"));
+		JLabel lbBirthday = new JLabel(Messages.getString("MemberDialog.Birthday"));
+		JLabel lbDiscountRate = new JLabel(Messages.getString("MemberDialog.DiscountRate"));
 		JPanel pProperty = new JPanel(new GridBagLayout());
 		pProperty.setLayout(new GridBagLayout());
 		pProperty.add(lbName, 		new GridBagConstraints(0, 0, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
@@ -137,7 +139,7 @@ public class MemberDialog extends JDialog{
 			JOptionPane.showMessageDialog(this, "get null from server for add/update member. URL = " + url);
 			return false;
 		}
-		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		Gson gson = new GsonBuilder().setDateFormat(ConstantValue.DATE_PATTERN_YMDHMS).create();
 		HttpResult<Member> result = gson.fromJson(response, new TypeToken<HttpResult<Member>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while add/update member. URL = " + url + ", response = "+response);

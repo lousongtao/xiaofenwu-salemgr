@@ -181,7 +181,7 @@ public class HttpUtil {
 			JOptionPane.showMessageDialog(parent, "get null from server for loading member. URL = " + url);
 			return null;
 		}
-		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		Gson gson = new GsonBuilder().setDateFormat(ConstantValue.DATE_PATTERN_YMDHMS).create();
 		HttpResult<ArrayList<Member>> result = gson.fromJson(response, new TypeToken<HttpResult<ArrayList<Member>>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while loading member. URL = " + url + ", response = "+response);
@@ -201,7 +201,7 @@ public class HttpUtil {
 			JOptionPane.showMessageDialog(parent, "get null from server for loading goods by barcode " + barcode + ". URL = " + url);
 			return null;
 		}
-		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		Gson gson = new GsonBuilder().setDateFormat(ConstantValue.DATE_PATTERN_YMDHMS).create();
 		HttpResult<Goods> result = gson.fromJson(response, new TypeToken<HttpResult<Goods>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while loading goods by barcode " + barcode + ". URL = " + url + ", response = "+response);
@@ -338,7 +338,7 @@ public class HttpUtil {
 			JOptionPane.showMessageDialog(parent, "get null from server for query preorder. URL = " + url);
 			return null;
 		}
-		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		Gson gson = new GsonBuilder().setDateFormat(ConstantValue.DATE_PATTERN_YMDHMS).create();
 		HttpResult<ArrayList<Indent>> result = gson.fromJson(response, new TypeToken<HttpResult<ArrayList<Indent>>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while query preorder. URL = " + url + ", response = "+response);
@@ -359,7 +359,7 @@ public class HttpUtil {
 			JOptionPane.showMessageDialog(parent, "get null from server for change preorder to order. URL = " + url);
 			return null;
 		}
-		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		Gson gson = new GsonBuilder().setDateFormat(ConstantValue.DATE_PATTERN_YMDHMS).create();
 		HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while change preorder to order. URL = " + url + ", response = "+response);
@@ -380,7 +380,7 @@ public class HttpUtil {
 			JOptionPane.showMessageDialog(parent, "get null from server for delete preorder. URL = " + url);
 			return false;
 		}
-		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		Gson gson = new GsonBuilder().setDateFormat(ConstantValue.DATE_PATTERN_YMDHMS).create();
 		HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while delete preorder. URL = " + url + ", response = "+response);
@@ -401,7 +401,7 @@ public class HttpUtil {
 			JOptionPane.showMessageDialog(parent, "get null from server for query member by membercard. URL = " + url);
 			return null;
 		}
-		Gson gson = new GsonBuilder().setDateFormat("yyyy/MM/dd HH:mm:ss").create();
+		Gson gson = new GsonBuilder().setDateFormat(ConstantValue.DATE_PATTERN_YMDHMS).create();
 		HttpResult<ArrayList<Member>> result = gson.fromJson(response, new TypeToken<HttpResult<ArrayList<Member>>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while query member by membercard. URL = " + url + ", response = "+response);

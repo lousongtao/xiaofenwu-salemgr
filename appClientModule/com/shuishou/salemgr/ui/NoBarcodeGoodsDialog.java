@@ -32,17 +32,18 @@ import org.apache.log4j.Logger;
 import com.shuishou.salemgr.Messages;
 import com.shuishou.salemgr.beans.Category2;
 import com.shuishou.salemgr.beans.Goods;
+import com.shuishou.salemgr.ui.components.CommonDialog;
 import com.shuishou.salemgr.ui.components.JBlockedButton;
 import com.shuishou.salemgr.ui.uibean.ChoosedGoods;
 
-public class NoBarcodeGoodsDialog extends JDialog implements ActionListener{
+public class NoBarcodeGoodsDialog extends CommonDialog implements ActionListener{
 	private final Logger logger = Logger.getLogger(NoBarcodeGoodsDialog.class.getName());
 	
 	private MainFrame mainFrame;
 	
-	private JButton btnRemove = new JButton("Remove");
+	private JButton btnRemove = new JButton(Messages.getString("Delete"));
 	private JButton btnClose = new JButton(Messages.getString("CloseDialog"));
-	private JBlockedButton btnConfirm = new JBlockedButton("Confirm", null);
+	private JBlockedButton btnConfirm = new JBlockedButton(Messages.getString("ConfirmDialog"), null);
 	private JPanel pGoods = new JPanel(new FlowLayout(FlowLayout.LEFT));
 	private JList<ChoosedGoods> listChoosedGoods = new JList<>();
 	private ListModel<ChoosedGoods> listModelChoosedGoods = new ListModel<>();

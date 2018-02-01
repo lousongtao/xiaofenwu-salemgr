@@ -16,10 +16,11 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import com.shuishou.salemgr.Messages;
+import com.shuishou.salemgr.ui.components.CommonDialog;
 import com.shuishou.salemgr.ui.components.IconButton;
 import com.shuishou.salemgr.ui.components.NumberTextField;
 
-public class ChangeAmountDialog extends JDialog{
+public class ChangeAmountDialog extends CommonDialog{
 	public int inputInteger;
 	public boolean isConfirm = false;
 	private NumberTextField txt;
@@ -76,17 +77,14 @@ public class ChangeAmountDialog extends JDialog{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int i = Integer.parseInt(txt.getText());
-				txt.setText(String.valueOf(i + 1));
+				txt.setText(String.valueOf(++i));
 			}});
 		btnMinus.addActionListener(new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int i = Integer.parseInt(txt.getText());
-				i--;
-				if (i < 0)
-					i = 0;
-				txt.setText(String.valueOf(i));
+				txt.setText(String.valueOf(--i));
 			}});
 		this.setSize(new Dimension(500, 320));
 		this.setLocation((int)(parent.getWidth() / 2 - this.getWidth() /2 + parent.getLocation().getX()), 

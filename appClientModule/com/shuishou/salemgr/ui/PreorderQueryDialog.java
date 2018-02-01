@@ -47,10 +47,11 @@ import com.shuishou.salemgr.beans.Member;
 import com.shuishou.salemgr.http.HttpUtil;
 import com.shuishou.salemgr.printertool.PrintJob;
 import com.shuishou.salemgr.printertool.PrintQueue;
+import com.shuishou.salemgr.ui.components.CommonDialog;
 import com.shuishou.salemgr.ui.components.JDatePicker;
 import com.shuishou.salemgr.ui.uibean.ChoosedGoods;
 
-public class PreorderQueryDialog extends JDialog implements ActionListener{
+public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 	private final Logger logger = Logger.getLogger(PreorderQueryDialog.class.getName());
 	private MainFrame mainFrame;
 	private JTextField tfMemberCard = new JTextField();
@@ -59,9 +60,9 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 	private JButton btnQuery = new JButton(Messages.getString("Query"));
 	private JButton btnClose = new JButton(Messages.getString("CloseDialog"));
 	private JButton btnDelete = new JButton(Messages.getString("Delete"));
-	private JButton btnChangeToOrder = new JButton("Change To Order");
-	private JButton btnPrintOneOrder = new JButton("Print Order");
-	private JButton btnPrintAllOrder = new JButton("Print All Orders");
+	private JButton btnChangeToOrder = new JButton(Messages.getString("PreorderQueryDialog.ChangeToOrder"));
+	private JButton btnPrintOneOrder = new JButton(Messages.getString("PreorderQueryDialog.PrintOrder"));
+	private JButton btnPrintAllOrder = new JButton(Messages.getString("PreorderQueryDialog.PrintAllOrders"));
 	
 	private JTable tableIndent = new JTable();
 	private IndentModel modelIndent = new IndentModel();
@@ -80,8 +81,8 @@ public class PreorderQueryDialog extends JDialog implements ActionListener{
 	
 	private void initUI(){
 		JLabel lbTableName = new JLabel(Messages.getString("MemberCard"));
-		JLabel lbStartDate = new JLabel("Start Date : ");
-		JLabel lbEndDate = new JLabel("End Date : ");
+		JLabel lbStartDate = new JLabel(Messages.getString("StartDate"));
+		JLabel lbEndDate = new JLabel(Messages.getString("EndDate"));
 		tfMemberCard.setPreferredSize(new Dimension(150, 25));
 		dpStartDate.setShowYearButtons(true);
 		dpEndDate.setShowYearButtons(true);

@@ -22,8 +22,9 @@ import com.shuishou.salemgr.ConstantValue;
 import com.shuishou.salemgr.Messages;
 import com.shuishou.salemgr.beans.Goods;
 import com.shuishou.salemgr.beans.Member;
+import com.shuishou.salemgr.ui.components.CommonDialog;
 
-public class MemberListDialog extends JDialog{
+public class MemberListDialog extends CommonDialog{
 
 	private Member choosedMember;
 	private JTable table = new JTable();
