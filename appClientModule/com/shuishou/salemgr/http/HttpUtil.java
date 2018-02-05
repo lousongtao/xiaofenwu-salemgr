@@ -79,7 +79,7 @@ public class HttpUtil {
         try {
             httpResponse=httpClient.execute(httpGet); 
         } catch (Exception e) {
-        	logger.error(e);
+        	logger.error("", e);
         }
         if (httpResponse == null)
         	return null;
@@ -102,7 +102,7 @@ public class HttpUtil {
                 }
                 
             } catch (Exception e) {
-            	logger.error(e);
+            	logger.error("", e);
             }
         }
         
@@ -146,12 +146,12 @@ public class HttpUtil {
                     }
                     
                 } catch (Exception e) {
-                    logger.error(e);
+                    logger.error("", e);
                 }
             }
             
         } catch (Exception e) {
-            logger.error(e);
+            logger.error("", e);
         }
         return null;
     } 

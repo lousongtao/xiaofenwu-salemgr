@@ -106,6 +106,10 @@ public class NoBarcodeGoodsDialog extends CommonDialog implements ActionListener
 		} 
 	}
 	
+	public void doEnterClick(){
+		setVisible(false);
+	}
+	
 	public ArrayList<ChoosedGoods> getChoosedGoods(){
 		ArrayList<ChoosedGoods> listcg = new ArrayList<>();
 		for (int j = 0; j < listModelChoosedGoods.size(); j++) {

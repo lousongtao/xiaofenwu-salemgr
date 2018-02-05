@@ -65,11 +65,7 @@ public class ChangeAmountDialog extends CommonDialog{
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (txt.getText() == null || txt.getText().length() == 0)
-					return;
-				isConfirm = true;
-				inputInteger = Integer.parseInt(txt.getText());
-				setVisible(false);
+				doConfirm();
 			}
 		});
 		btnPlus.addActionListener(new ActionListener(){
@@ -89,5 +85,17 @@ public class ChangeAmountDialog extends CommonDialog{
 		this.setSize(new Dimension(500, 320));
 		this.setLocation((int)(parent.getWidth() / 2 - this.getWidth() /2 + parent.getLocation().getX()), 
 				(int)(parent.getHeight() / 2 - this.getHeight() / 2 + parent.getLocation().getY()));
+	}
+	
+	private void doConfirm(){
+		if (txt.getText() == null || txt.getText().length() == 0)
+			return;
+		isConfirm = true;
+		inputInteger = Integer.parseInt(txt.getText());
+		setVisible(false);
+	}
+	
+	public void doEnterClick(){
+		doConfirm();
 	}
 }

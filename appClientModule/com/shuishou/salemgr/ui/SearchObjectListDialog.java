@@ -80,6 +80,10 @@ public class SearchObjectListDialog extends CommonDialog{
 		});
 	}
 	
+	public void doEnterClick(){
+		doConfirm();
+	}
+	
 	private void doConfirm(){
 		if (table.getSelectedRow() < 0){
 			JOptionPane.showMessageDialog(this, "No select any record");

@@ -11,6 +11,8 @@ public class PayWay {
 	
 	private int sequence;
 	
+	private String symbol;
+	
 	public PayWay(){}
 	
 	public PayWay(int id, String name){
@@ -49,6 +51,14 @@ public class PayWay {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getSymbol() {
+		return symbol;
+	}
+
+	public void setSymbol(String symbol) {
+		this.symbol = symbol;
 	}
 
 	@Override

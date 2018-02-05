@@ -145,6 +145,9 @@ public class RefundDialog extends CommonDialog{
 		
 	}
 	
+	public void doEnterClick(){
+		doRefund();
+	}
 	
 	public void doRefund(){
 		JSONArray ja = new JSONArray();

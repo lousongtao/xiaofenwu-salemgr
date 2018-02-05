@@ -53,8 +53,8 @@ public class MemberListDialog extends CommonDialog{
 		table.getColumnModel().getColumn(5).setPreferredWidth(120);
 		table.getColumnModel().getColumn(6).setPreferredWidth(120);
 		JScrollPane jspTable = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		JButton btnConfirm = new JButton("Choose");
-		JButton btnCancel = new JButton("Cancel");
+		JButton btnConfirm = new JButton(Messages.getString("ConfirmDialog"));
+		JButton btnCancel = new JButton(Messages.getString("CloseDialog"));
 		JPanel pButton = new JPanel();
 		pButton.add(btnConfirm);
 		pButton.add(btnCancel);
@@ -93,6 +93,10 @@ public class MemberListDialog extends CommonDialog{
 		}
 		choosedMember = ((MemberTableModel)table.getModel()).getObjectAt(table.getSelectedRow());
 		this.setVisible(false);
+	}
+	
+	public void doEnterClick(){
+		doConfirm();
 	}
 	
 	public Member getChoosedMember(){

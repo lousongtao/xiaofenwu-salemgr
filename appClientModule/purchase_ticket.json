@@ -81,8 +81,8 @@
 		"variable": "price"
 	},
 	{
-		"name": "Amount",
-		"width": 8,
+		"name": "Quantity",
+		"width": 10,
 		"size":9,
 		"bold": false,
 		"variable": "amount"
@@ -138,7 +138,7 @@
 		"type": 0
 	},
 	{
-		"text": "Paid:                        {$getcash}",
+		"text": "Paid:                        {$paid}",
 		"size": 8,
 		"bold": false,
 		"align": 0,

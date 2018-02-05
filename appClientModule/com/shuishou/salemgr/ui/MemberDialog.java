@@ -149,6 +149,11 @@ public class MemberDialog extends CommonDialog{
 		member = result.data;
 		return true;
 	}
+	
+	public void doEnterClick(){
+		doSave();
+	}
+	
 
 	public Member getMember(){
 		return member;

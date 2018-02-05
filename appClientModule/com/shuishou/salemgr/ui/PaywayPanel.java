@@ -44,7 +44,7 @@ public class PaywayPanel extends JPanel{
 		lbChange.setMaximumSize(new Dimension(120,35));
 		lbChange.setMinimumSize(new Dimension(120, 35));
 		
-		lbShouldPay.setText("Needs " + CommonTools.transferDouble2Scale(orderPrice * payway.getRate()));
+		lbShouldPay.setText("Needs " + payway.getSymbol() + CommonTools.transferDouble2Scale(orderPrice * payway.getRate()));
 		tfGetPay.setText(CommonTools.transferDouble2Scale(orderPrice * payway.getRate()));
 		tfGetPay.selectAll();
 		rbName.setSelected(false);

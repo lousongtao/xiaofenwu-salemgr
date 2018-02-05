@@ -375,6 +375,10 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 		PreOrderCheckoutDialog.this.setVisible(false);
 	}
 	
+	public void doEnterClick(){
+		doMakePreOrder(true);
+	}
+	
 	private void doPrintTicket(boolean paid, Indent indent){
 		Map<String,String> keyMap = new HashMap<String, String>();
 		if (member != null){
@@ -398,7 +402,8 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 			keyMap.put("payWay", "Unpaid");
 		}
 		PaywayPanel paywayPanel = getChoosedPayWayPanel();
-		keyMap.put("getcash", paywayPanel.getMoneyAmount()+"");
+		String symbol = paywayPanel.getPayway().getSymbol().replace("$", "\\$");
+		keyMap.put("paid", symbol + paywayPanel.getMoneyAmount());
 		keyMap.put("change", CommonTools.transferDouble2Scale(paywayPanel.getChangeAmount()));
 		List<Map<String, String>> goods = new ArrayList<>();
 		for (int i = 0; i< indent.getItems().size(); i++) {

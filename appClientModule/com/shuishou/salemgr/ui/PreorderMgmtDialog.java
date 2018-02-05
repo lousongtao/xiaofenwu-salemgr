@@ -51,8 +51,8 @@ import com.shuishou.salemgr.ui.components.CommonDialog;
 import com.shuishou.salemgr.ui.components.JDatePicker;
 import com.shuishou.salemgr.ui.uibean.ChoosedGoods;
 
-public class PreorderQueryDialog extends CommonDialog implements ActionListener{
-	private final Logger logger = Logger.getLogger(PreorderQueryDialog.class.getName());
+public class PreorderMgmtDialog extends CommonDialog implements ActionListener{
+	private final Logger logger = Logger.getLogger(PreorderMgmtDialog.class.getName());
 	private MainFrame mainFrame;
 	private JTextField tfMemberCard = new JTextField();
 	private JDatePicker dpStartDate = new JDatePicker();
@@ -72,7 +72,7 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 	
 	private ArrayList<Indent> listIndent = new ArrayList<>();
 	
-	public PreorderQueryDialog(MainFrame mainFrame){
+	public PreorderMgmtDialog(MainFrame mainFrame){
 		this.mainFrame = mainFrame;
 		this.setModal(true);
 		this.setTitle(Messages.getString("MainFrame.PreOrderMgr"));
@@ -151,7 +151,8 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 			public void valueChanged(ListSelectionEvent e) {
 				if (tableIndent.getSelectedRow() < 0)
 					return;
-				modelIndentDetail.setData((ArrayList)modelIndent.getObjectAt(tableIndent.getSelectedRow()).getItems());
+				int modelRow = tableIndent.convertRowIndexToModel(tableIndent.getSelectedRow());
+				modelIndentDetail.setData((ArrayList)modelIndent.getObjectAt(modelRow).getItems());
 				tableIndentDetail.updateUI();
 			}
 			
@@ -198,10 +199,11 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 		}
 		if (JOptionPane.showConfirmDialog(this, "Do you want to change this preorder to order?", "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION)
 			return;
-		Indent indent = HttpUtil.doChangePreOrderToOrder(this, mainFrame.getOnDutyUser(), modelIndent.getObjectAt(row).getId() + "");
+		int modelRow = tableIndent.convertRowIndexToModel(row);
+		Indent indent = HttpUtil.doChangePreOrderToOrder(this, mainFrame.getOnDutyUser(), modelIndent.getObjectAt(modelRow).getId() + "");
 		if (indent != null){
 			doPrintTicket(indent);
-			modelIndent.deleteRow(row);
+			modelIndent.deleteRow(modelRow);
 			modelIndent.fireTableDataChanged();
 			modelIndentDetail.clearData();
 			modelIndentDetail.fireTableDataChanged();
@@ -220,7 +222,7 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 		Map<String,String> keyMap = new HashMap<String, String>();
 		if (member != null){
 			//reload member data from server
-			member = HttpUtil.doLoadMember(PreorderQueryDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
+			member = HttpUtil.doLoadMember(PreorderMgmtDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
 			//store into local memory
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
 			keyMap.put("member", member.getMemberCard() + "  score : "+ CommonTools.transferDouble2Scale(member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
@@ -234,7 +236,7 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 		keyMap.put("gst", CommonTools.transferNumberByPM(indent.getPaidPrice()/11, ""));
 		keyMap.put("payWay", indent.getPayWay());
 		keyMap.put("orderNo", indent.getIndentCode());
-		keyMap.put("getcash", "");
+		keyMap.put("paid", "");
 		keyMap.put("change", "");
 		List<Map<String, String>> goods = new ArrayList<>();
 		double originPrice = 0;
@@ -252,7 +254,7 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("keys", keyMap);
 		params.put("goods", goods);
-		PrintJob job = new PrintJob(ConstantValue.TICKET_TEMPLATE_PURCHASE, params, mainFrame.printerName);
+		PrintJob job = new PrintJob(ConstantValue.TICKET_TEMPLATE_PURCHASE, params, MainFrame.printerName);
 		PrintQueue.add(job);
 	}
 	
@@ -264,10 +266,11 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 		if (JOptionPane.showConfirmDialog(this, "Do you want to delete the selection preorder?", "Delete", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION){
 			return;
 		}
-		boolean result = HttpUtil.doDeletePreOrder(this, mainFrame.getOnDutyUser(), modelIndent.getObjectAt(row).getId() + "");
+		int modelRow = tableIndent.convertRowIndexToModel(row);
+		boolean result = HttpUtil.doDeletePreOrder(this, mainFrame.getOnDutyUser(), modelIndent.getObjectAt(modelRow).getId() + "");
 		if (result){
 			JOptionPane.showMessageDialog(this, "Delete preorder successfully");
-			modelIndent.deleteRow(row);
+			modelIndent.deleteRow(modelRow);
 			modelIndent.fireTableDataChanged();
 			modelIndentDetail.clearData();
 			modelIndentDetail.fireTableDataChanged();
@@ -277,7 +280,8 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 	private void doPrintOneOrder(){
 		if (tableIndent.getSelectedRow() < 0)
 			return;
-		Indent indent = ((IndentModel)tableIndent.getModel()).getObjectAt(tableIndent.getSelectedRow());
+		int modelRow = tableIndent.convertRowIndexToModel(tableIndent.getSelectedRow());
+		Indent indent = ((IndentModel)tableIndent.getModel()).getObjectAt(modelRow);
 		Map<String,String> keyMap = new HashMap<String, String>();
 		if (indent.getMemberCard() != null && indent.getMemberCard().length() > 0){
 			//reload member data from server
@@ -299,7 +303,7 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 			keyMap.put("payWay", "Unpaid");
 		}
 		
-		keyMap.put("getcash", "");
+		keyMap.put("paid", "");
 		keyMap.put("change", "");
 		keyMap.put("orderNo", indent.getIndentCode());
 		List<Map<String, String>> goods = new ArrayList<>();
@@ -315,7 +319,7 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("keys", keyMap);
 		params.put("goods", goods);
-		PrintJob job = new PrintJob(ConstantValue.TICKET_TEMPLATE_PREBUY, params, mainFrame.printerName);
+		PrintJob job = new PrintJob(ConstantValue.TICKET_TEMPLATE_PREBUY, params, MainFrame.printerName);
 		PrintQueue.add(job);
 	}
 	
@@ -335,7 +339,6 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 				gi.amount += detail.getAmount();
 			}
 		}
-		Indent indent = ((IndentModel)tableIndent.getModel()).getObjectAt(tableIndent.getSelectedRow());
 		Map<String,String> keyMap = new HashMap<String, String>();
 		keyMap.put("dateTime", ConstantValue.DFYMDHMS.format(new Date()));
 		
@@ -355,7 +358,7 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("keys", keyMap);
 		params.put("goods", goods);
-		PrintJob job = new PrintJob(ConstantValue.TICKET_TEMPLATE_PREBUY_ALL, params, mainFrame.printerName);
+		PrintJob job = new PrintJob(ConstantValue.TICKET_TEMPLATE_PREBUY_ALL, params, MainFrame.printerName);
 		PrintQueue.add(job);
 	}
 	
@@ -376,8 +379,15 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 		}
 	}
 	
+	public void doEnterClick(){
+	}
+	
 	class IndentModel extends DefaultTableModel{
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private String[] header = new String[]{Messages.getString("Time"), 
 				Messages.getString("Status"),
 				Messages.getString("MemberCard"), 
@@ -449,6 +459,10 @@ public class PreorderQueryDialog extends CommonDialog implements ActionListener{
 
 	class IndentDetailModel extends DefaultTableModel{
 
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private String[] header = new String[]{"Name", "Amount", "Goods Price", "Sold Price"};
 		private ArrayList<IndentDetail> details = new ArrayList<>();
 		public IndentDetailModel(){

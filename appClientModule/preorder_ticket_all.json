@@ -57,8 +57,8 @@
 		"variable": "price"
 	},
 	{
-		"name": "Amount",
-		"width": 8,
+		"name": "Quantity",
+		"width": 10,
 		"size":9,
 		"bold": false,
 		"variable": "amount"

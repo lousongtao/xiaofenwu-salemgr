@@ -8,6 +8,8 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.KeyStroke;
 
+import com.shuishou.salemgr.ui.components.CommonDialog;
+
 public class CommonTools {
 
 	public static String transferDouble2Scale(double d){
@@ -34,15 +36,22 @@ public class CommonTools {
 		}
 	}
 	
-	public static void addEscapeListener(final JDialog dialog){
-		ActionListener listener = new ActionListener(){
+	public static void addEscapeListener(final CommonDialog dialog){
+		ActionListener escListener = new ActionListener(){
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				dialog.setVisible(false);
 			}};
 			
-		dialog.getRootPane().registerKeyboardAction(listener, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), 
-				JComponent.WHEN_IN_FOCUSED_WINDOW);
+		dialog.getRootPane().registerKeyboardAction(escListener, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
+		
+		ActionListener enterListener = new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				dialog.doEnterClick();
+			}};
+		dialog.getRootPane().registerKeyboardAction(enterListener, KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), JComponent.WHEN_IN_FOCUSED_WINDOW);
 	}
 }

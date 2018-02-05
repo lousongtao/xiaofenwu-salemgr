@@ -19,7 +19,7 @@ import com.shuishou.salemgr.CommonTools;
  * @author Administrator
  *
  */
-public class CommonDialog extends JDialog{
+public abstract class CommonDialog extends JDialog{
 	public CommonDialog() {
         super((Frame)null, false);
         CommonTools.addEscapeListener(this);
@@ -102,4 +102,6 @@ public class CommonDialog extends JDialog{
         super(owner, title, modalityType, gc);
         CommonTools.addEscapeListener(this);
     }
+    
+    public abstract void doEnterClick();
 }

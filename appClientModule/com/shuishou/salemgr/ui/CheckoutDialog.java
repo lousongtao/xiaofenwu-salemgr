@@ -117,21 +117,9 @@ public class CheckoutDialog extends CommonDialog{
 		}
 		tfDiscountPrice = new NumberTextField(this, true, false);
 		
-//		tfGetCash = new NumberTextField(this, true, false);
-		
 		JPanel pPayway = new JPanel(new GridBagLayout());
 		pPayway.setBorder(BorderFactory.createTitledBorder(Messages.getString("CheckoutDialog.PayWay"))); //$NON-NLS-1$
 		ButtonGroup bgPayway = new ButtonGroup();
-//		bgPayway.add(rbPayCash);
-//		bgPayway.add(rbPayBankCard);
-//		bgPayway.add(rbPayMember);
-//		pPayway.add(rbPayCash, 		new GridBagConstraints(0, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-//		pPayway.add(lbGetCash, 		new GridBagConstraints(1, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 50, 0, 0), 0, 0));
-//		pPayway.add(tfGetCash, 		new GridBagConstraints(2, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 20, 0, 0), 0, 0));
-//		pPayway.add(lbChange, 		new GridBagConstraints(3, 0, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 20, 0, 0), 0, 0));
-//		pPayway.add(rbPayBankCard, 	new GridBagConstraints(0, 1, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-//		pPayway.add(rbPayMember,	new GridBagConstraints(1, 1, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 50, 0, 0), 0, 0));
-//		pPayway.add(tfMember, 		new GridBagConstraints(2, 1, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10, 20, 0, 0), 0, 0));
 		if (!mainFrame.getPaywayList().isEmpty()){
 			for (int i = 0; i < mainFrame.getPaywayList().size(); i++) {
 				PayWay pw = mainFrame.getPaywayList().get(i);
@@ -174,7 +162,6 @@ public class CheckoutDialog extends CommonDialog{
 		tfDiscountPrice.setPreferredSize(dDiscountPrice);
 		
 		JPanel pDiscount = new JPanel(new GridBagLayout());
-//		pDiscount.setBackground(bgDiscountColor);
 		pDiscount.setBorder(BorderFactory.createTitledBorder(Messages.getString("CheckoutDialog.BorderDiscount"))); //$NON-NLS-1$
 		ButtonGroup bgDiscount = new ButtonGroup();
 		bgDiscount.add(rbDiscountNon);
@@ -239,25 +226,6 @@ public class CheckoutDialog extends CommonDialog{
 				mainFrame.clearTable();
 			}});
 		
-//		tfGetCash.getDocument().addDocumentListener(new DocumentListener(){
-//			
-//			@Override
-//			public void insertUpdate(DocumentEvent e) {
-//				rbPayCash.setSelected(true);
-//				showChargeText();
-//			}
-//
-//			@Override
-//			public void removeUpdate(DocumentEvent e) {
-//				rbPayCash.setSelected(true);
-//				showChargeText();
-//			}
-//
-//			@Override
-//			public void changedUpdate(DocumentEvent e) {
-//				rbPayCash.setSelected(true);
-//				showChargeText();
-//			}});
 		tfDiscountPrice.getDocument().addDocumentListener(new DocumentListener(){
 
 			@Override
@@ -309,16 +277,6 @@ public class CheckoutDialog extends CommonDialog{
 	}
 	
 	private void showChargeText(){
-//		if (!rbPayCash.isSelected())
-//			return;
-//		if (tfGetCash.getText() == null || tfGetCash.getText().length() == 0){
-//			lbChange.setText("");
-//			return;
-//		}
-//		double value = Double.parseDouble(tfGetCash.getText());
-//		if (value < discountPrice)
-//			return;
-//		lbChange.setText(Messages.getString("CheckoutDialog.Charge")+" $" + String.format("%.2f", value - discountPrice));
 	}
 	
 	private DiscountTemplateRadioButton getSelectedDiscountTemplateRadioButton(){
@@ -367,12 +325,18 @@ public class CheckoutDialog extends CommonDialog{
 		return null;
 	}
 	
+	public void doEnterClick(){
+		doPay();
+	}
+	
 	/**
 	 * seperate the list by amount; if amount > 0, think it as order, otherwise think it as refund
 	 */
 	public void doPay(){
-		boolean existingOrder = false;
-		boolean existingRefund = false;
+		boolean existingOrder = false; //购物单标记
+		boolean existingRefund = false; //退货单标记
+		double paidPrice4Order = 0;
+		double paidPrice4Refund = 0;
 		JSONArray ja_order = new JSONArray();//订单
 		JSONArray ja_refund = new JSONArray();//退单
 		for (int i = 0; i< choosedGoods.size(); i++) {
@@ -380,18 +344,20 @@ public class CheckoutDialog extends CommonDialog{
 			ChoosedGoods cg = choosedGoods.get(i);
 			jo.put("id", cg.goods.getId());
 			jo.put("amount", cg.amount);
+			double soldPrice = cg.goods.getSellPrice();
 			if (cg.modifiedPrice >= 0)
-				jo.put("soldPrice", cg.modifiedPrice);
-			else if (member == null)
-				jo.put("soldPrice", cg.goods.getSellPrice());
+				soldPrice = cg.modifiedPrice;
 			else if (member != null)
-				jo.put("soldPrice", String.format(ConstantValue.FORMAT_DOUBLE, cg.goods.getSellPrice() * member.getDiscountRate()));
+				soldPrice = cg.goods.getSellPrice() * member.getDiscountRate();
+			jo.put("soldPrice", String.format(ConstantValue.FORMAT_DOUBLE, soldPrice));
 			if (cg.amount > 0){
 				ja_order.put(jo);
 				existingOrder = true;
+				paidPrice4Order += soldPrice * cg.amount;
 			} else if (cg.amount < 0){
 				ja_refund.put(jo);
 				existingRefund = true;
+				paidPrice4Refund += soldPrice * cg.amount;
 			}
 		}
 		
@@ -402,7 +368,7 @@ public class CheckoutDialog extends CommonDialog{
 			params.put("member", member.getMemberCard());
 		else
 			params.put("member", "");
-		params.put("paidPrice", discountPrice + "");
+		
 		PayWay payway = getChoosedPayWay();
 		if (payway == null){
 			JOptionPane.showMessageDialog(this, "Must choose a way for payment.");
@@ -413,6 +379,7 @@ public class CheckoutDialog extends CommonDialog{
 		Indent indent = null;//use this indent to collect all of the indent.items
 		if (existingOrder){
 			String url = "indent/makeindent";
+			params.put("paidPrice", String.format(ConstantValue.FORMAT_DOUBLE, paidPrice4Order));
 			params.put("indents", ja_order.toString());
 			String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
 			if (response == null){
@@ -435,6 +402,7 @@ public class CheckoutDialog extends CommonDialog{
 		}
 		if (existingRefund){
 			String url = "indent/refundindent";
+			params.put("paidPrice", String.format(ConstantValue.FORMAT_DOUBLE, paidPrice4Refund));
 			params.put("indents", ja_refund.toString());
 			params.put("returnToStorage", String.valueOf(true));
 			params.put("refundPrice", "");
@@ -465,15 +433,6 @@ public class CheckoutDialog extends CommonDialog{
 		//clean table data
 		mainFrame.clearTable();
 		CheckoutDialog.this.setVisible(false);
-//		if (rbPayCash.isSelected()){
-//			double getcash = 0;
-//			if (tfGetCash.getText() != null && tfGetCash.getText().length() !=0){
-//				getcash = Double.parseDouble(tfGetCash.getText());
-//			}
-//			JOptionPane.showMessageDialog(mainFrame, Messages.getString("CheckoutDialog.GetCash") + tfGetCash.getText()
-//			+ "\n" + Messages.getString("CheckoutDialog.ShouldPayAmount") + CommonTools.transferNumberByPM(discountPrice, "")
-//			+ "\n" + Messages.getString("CheckoutDialog.Charge") + CommonTools.transferNumberByPM(getcash - discountPrice, ""));
-//		}
 	}
 	
 	private void doPrintTicket(Indent indent){
@@ -495,7 +454,9 @@ public class CheckoutDialog extends CommonDialog{
 		keyMap.put("payWay", indent.getPayWay());
 		keyMap.put("orderNo", indent.getIndentCode());
 		PaywayPanel paywayPanel = getChoosedPayWayPanel();
-		keyMap.put("getcash", paywayPanel.getMoneyAmount()+"");
+		String symbol = paywayPanel.getPayway().getSymbol().replace("$", "\\$");
+		
+		keyMap.put("paid", symbol+paywayPanel.getMoneyAmount());
 		keyMap.put("change", CommonTools.transferDouble2Scale(paywayPanel.getChangeAmount()));
 		double originPrice = 0;
 		List<Map<String, String>> goods = new ArrayList<>();
@@ -558,7 +519,7 @@ public class CheckoutDialog extends CommonDialog{
 			lbChange.setMaximumSize(new Dimension(120,35));
 			lbChange.setMinimumSize(new Dimension(120, 35));
 			
-			lbShouldPay.setText("Needs " + CommonTools.transferDouble2Scale(orderPrice * payway.getRate()));
+			lbShouldPay.setText("Needs " + payway.getSymbol() + CommonTools.transferDouble2Scale(orderPrice * payway.getRate()));
 			tfGetPay.setText(CommonTools.transferDouble2Scale(orderPrice * payway.getRate()));
 			tfGetPay.selectAll();
 			rbName.setSelected(false);
@@ -649,5 +610,11 @@ public class CheckoutDialog extends CommonDialog{
 			double value = Double.parseDouble(tfGetPay.getText());
 			return value / payway.getRate() - orderPrice;
 		}
+
+		public PayWay getPayway() {
+			return payway;
+		}
+		
+		
 	}
 }
