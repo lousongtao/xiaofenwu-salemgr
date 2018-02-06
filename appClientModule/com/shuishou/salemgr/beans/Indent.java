@@ -27,7 +27,17 @@ private int id;
 	
 	private String operator;//操作人
 	
+	private double adjustPrice;
 	
+	
+	public double getAdjustPrice() {
+		return adjustPrice;
+	}
+
+	public void setAdjustPrice(double adjustPrice) {
+		this.adjustPrice = adjustPrice;
+	}
+
 	public String getOperator() {
 		return operator;
 	}

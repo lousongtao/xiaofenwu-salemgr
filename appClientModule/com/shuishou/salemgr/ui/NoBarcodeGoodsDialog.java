@@ -141,9 +141,15 @@ public class NoBarcodeGoodsDialog extends CommonDialog implements ActionListener
 	
 	private void doCategory2ButtonClick(Category2 c2){
 		pGoods.removeAll();
-		for(Goods g : c2.getGoods()){
-			GoodsButton btn = new GoodsButton(g);
-			pGoods.add(btn);
+		if (c2.getGoods() == null)
+			return;
+		for(int i = 0; i < c2.getGoods().size(); i++){
+			Goods g = c2.getGoods().get(i);
+			if (g.getBarcode() == null || g.getBarcode().length() == 0){
+				GoodsButton btn = new GoodsButton(g);
+				pGoods.add(btn);
+			}
+			
 		}
 		pGoods.updateUI();
 	}
@@ -163,7 +169,7 @@ public class NoBarcodeGoodsDialog extends CommonDialog implements ActionListener
 			}
 		}
 		if (!foundexist) {
-			listModelChoosedGoods.addElement(cg);
+			listModelChoosedGoods.insertElementAt(cg, 0);
 		}
 	}
 	

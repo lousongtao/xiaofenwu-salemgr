@@ -225,7 +225,8 @@ public class PreorderMgmtDialog extends CommonDialog implements ActionListener{
 			member = HttpUtil.doLoadMember(PreorderMgmtDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
 			//store into local memory
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
-			keyMap.put("member", member.getMemberCard() + "  score : "+ CommonTools.transferDouble2Scale(member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
+			keyMap.put("member", member.getMemberCard() + ", "+ member.getName() + String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) 
+			+ ", " + (member.getDiscountRate() * 100) + "%");
 		}else {
 			keyMap.put("member", "");
 			keyMap.put("discount", "");
@@ -288,7 +289,8 @@ public class PreorderMgmtDialog extends CommonDialog implements ActionListener{
 			Member member = HttpUtil.doLoadMember(this, mainFrame.getOnDutyUser(), indent.getMemberCard());
 			//store into local memory
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
-			keyMap.put("member", member.getMemberCard() + "  point : "+ CommonTools.transferDouble2Scale(member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
+			keyMap.put("member", member.getMemberCard() + ", "+ member.getName() + String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) 
+					+ ", " + (member.getDiscountRate() * 100) + "%");
 		}else {
 			keyMap.put("member", "");
 			keyMap.put("discount", "");

@@ -65,11 +65,12 @@ public class QueryTodayIndentDialog extends CommonDialog implements ActionListen
 		tableIndent.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tableIndent.getColumnModel().getColumn(0).setPreferredWidth(200);
 		tableIndent.getColumnModel().getColumn(1).setPreferredWidth(120);
-		tableIndent.getColumnModel().getColumn(2).setPreferredWidth(80);
-		tableIndent.getColumnModel().getColumn(3).setPreferredWidth(100);
+		tableIndent.getColumnModel().getColumn(2).setPreferredWidth(150);
+		tableIndent.getColumnModel().getColumn(3).setPreferredWidth(80);
 		tableIndent.getColumnModel().getColumn(4).setPreferredWidth(100);
-		tableIndent.getColumnModel().getColumn(5).setPreferredWidth(150);
-		tableIndent.getColumnModel().getColumn(6).setPreferredWidth(180);
+		tableIndent.getColumnModel().getColumn(5).setPreferredWidth(100);
+		tableIndent.getColumnModel().getColumn(6).setPreferredWidth(150);
+		tableIndent.getColumnModel().getColumn(7).setPreferredWidth(180);
 		tableIndent.setAutoCreateRowSorter(true);
 		tableIndent.setRowHeight(35);
 		JScrollPane jspTableIndent = new JScrollPane(tableIndent, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
@@ -165,8 +166,8 @@ public class QueryTodayIndentDialog extends CommonDialog implements ActionListen
 		if (indent.getMemberCard() != null && indent.getMemberCard().length() > 0){
 			//reload member data from server
 			Member member = HttpUtil.doLoadMember(QueryTodayIndentDialog.this, mainFrame.getOnDutyUser(), indent.getMemberCard());
-			keyMap.put("member", member.getMemberCard() + ", points: " + String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) 
-				+ ", discount: " + (member.getDiscountRate() * 100) + "%");
+			keyMap.put("member", member.getMemberCard() + ", "+ member.getName() + String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) 
+				+ ", " + (member.getDiscountRate() * 100) + "%");
 		}else {
 			keyMap.put("member", "");
 		}
@@ -223,7 +224,7 @@ public class QueryTodayIndentDialog extends CommonDialog implements ActionListen
 	
 	class IndentModel extends AbstractTableModel{
 
-		private String[] header = new String[]{"Time", "Member Card", "Price", "Paid Price", "Pay Way", "Order Code", "Type"};
+		private String[] header = new String[]{"Time", "Member Card", "Member Name", "Price", "Paid Price", "Pay Way", "Order Code", "Type"};
 		
 		public IndentModel(){
 
@@ -247,16 +248,20 @@ public class QueryTodayIndentDialog extends CommonDialog implements ActionListen
 				return ConstantValue.DFYMDHMS.format(indent.getCreateTime());
 			case 1:
 				return indent.getMemberCard();
-			case 2: 
+			case 2:
+				Member m = mainFrame.getMemberByMemberCard(indent.getMemberCard());
+				
+				return m == null ? "" : m.getName();
+			case 3: 
 				return indent.getTotalPrice();
-			case 3:
-				return indent.getPaidPrice();
 			case 4:
+				return indent.getPaidPrice();
+			case 5:
 				return indent.getPayWay();
 			
-			case 5:
-				return String.valueOf(indent.getIndentCode());
 			case 6:
+				return String.valueOf(indent.getIndentCode());
+			case 7:
 				if (indent.getIndentType() == ConstantValue.INDENT_TYPE_ORDER)
 					return "ORDER";
 				else if (indent.getIndentType() == ConstantValue.INDENT_TYPE_PREBUY_PAID)

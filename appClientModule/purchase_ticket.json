@@ -130,6 +130,22 @@
 		"type": 0
 	},
 	{
+		"text": "{$adjustPrice}",
+		"size": 8,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
+		"text": "{$discountTemp}",
+		"size": 8,
+		"bold": false,
+		"align": 0,
+		"line": true,
+		"type": 0
+	},
+	{
 		"text": "Payment Type:          {$payWay}",
 		"size": 8,
 		"bold": false,

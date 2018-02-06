@@ -88,7 +88,7 @@ public class GoodsTableModel extends DefaultTableModel{
 			}
 		}
 		if (!isExist){
-			items.add(item);
+			items.add(0, item);
 		}
 	}
 	

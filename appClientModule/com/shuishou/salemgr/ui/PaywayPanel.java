@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
@@ -28,9 +30,14 @@ public class PaywayPanel extends JPanel{
 	private JRadioButton rbName;
 	private PayWay payway;
 	private double orderPrice;
-	public PaywayPanel(PayWay payway, double orderPrice){
+	private double change;//找零
+	private JDialog parent;
+	private PaywayPanel nextSiblingPaywayPanel;
+	private PaywayPanel preSiblingPaywayPanel;
+	public PaywayPanel(final JDialog parent, PayWay payway, double orderPrice){
 		this.payway = payway;
 		this.orderPrice = orderPrice;
+		this.parent = parent;
 		rbName = new JRadioButton(payway.getName());
 		tfGetPay.setPreferredSize(new Dimension(120, 35));
 		tfGetPay.setMaximumSize(new Dimension(120,35));
@@ -44,9 +51,9 @@ public class PaywayPanel extends JPanel{
 		lbChange.setMaximumSize(new Dimension(120,35));
 		lbChange.setMinimumSize(new Dimension(120, 35));
 		
-		lbShouldPay.setText("Needs " + payway.getSymbol() + CommonTools.transferDouble2Scale(orderPrice * payway.getRate()));
-		tfGetPay.setText(CommonTools.transferDouble2Scale(orderPrice * payway.getRate()));
-		tfGetPay.selectAll();
+		setShouldPay();
+		setGetPay();
+		
 		rbName.setSelected(false);
 		lbShouldPay.setVisible(false);
 		lbChange.setVisible(false);
@@ -90,19 +97,71 @@ public class PaywayPanel extends JPanel{
 				showChangeText();
 			}
 		});
+		
+		tfGetPay.addKeyListener(new KeyAdapter(){
+			public void keyPressed(KeyEvent e) {
+				if (e.getID() != KeyEvent.KEY_PRESSED)
+					return;
+				if (e.getKeyCode() == KeyEvent.VK_ENTER){
+					if (parent instanceof CheckoutDialog)
+						((CheckoutDialog)parent).doPay();
+					else if (parent instanceof PreOrderCheckoutDialog)
+						((PreOrderCheckoutDialog)parent).doMakePreOrder(true);
+				} else if (e.getKeyCode() == KeyEvent.VK_UP){
+					if (preSiblingPaywayPanel != null){
+						preSiblingPaywayPanel.setSelected(true);
+					}
+				} else if (e.getKeyCode() == KeyEvent.VK_DOWN){
+					if (nextSiblingPaywayPanel != null){
+						nextSiblingPaywayPanel.setSelected(true);
+					}
+				}
+			}
+		});
+	}
+	
+	
+	public void setNextSiblingPaywayPanel(PaywayPanel nextSiblingPaywayPanel) {
+		this.nextSiblingPaywayPanel = nextSiblingPaywayPanel;
+	}
+
+
+	public void setPreSiblingPaywayPanel(PaywayPanel preSiblingPaywayPanel) {
+		this.preSiblingPaywayPanel = preSiblingPaywayPanel;
+		preSiblingPaywayPanel.setNextSiblingPaywayPanel(this);
+	}
+
+
+	private void setShouldPay(){
+		lbShouldPay.setText("Needs " + payway.getSymbol() + CommonTools.transferDouble2Scale(orderPrice * payway.getRate()));
+	}
+	
+	private void setGetPay(){
+		tfGetPay.setText(CommonTools.transferDouble2Scale(orderPrice * payway.getRate()));
+		tfGetPay.selectAll();
+	}
+	public void setOrderPrice(double orderPrice){
+		this.orderPrice = orderPrice;
+		setShouldPay();
+		setGetPay();
+		change = 0;
+		showChangeText();
 	}
 	
 	private void showChangeText(){
 		if (tfGetPay.getText() == null || tfGetPay.getText().length() == 0)
 			return;
 		double value = Double.parseDouble(tfGetPay.getText());
-		if (value < orderPrice)
+		change = value - orderPrice * payway.getRate();
+		if (change < -0.01)
 			return;
-		lbChange.setText(Messages.getString("CheckoutDialog.Charge") + CommonTools.transferDouble2Scale(value - orderPrice));
+		lbChange.setText(Messages.getString("CheckoutDialog.Charge") + payway.getSymbol() + CommonTools.transferDouble2Scale(change));
+		System.out.println(lbChange.getText() + this.getPayway().getName());
 	}
 	
 	public void setSelected(boolean b){
 		rbName.setSelected(b);
+		rbName.requestFocusInWindow();
 		lbShouldPay.setVisible(b);
 		lbChange.setVisible(b);
 		tfGetPay.setVisible(b);
@@ -117,6 +176,7 @@ public class PaywayPanel extends JPanel{
 		tfGetPay.setText(s);
 		tfGetPay.requestFocusInWindow();
 		tfGetPay.selectAll();
+		
 	}
 	
 	public JRadioButton getRadioButton(){
@@ -126,17 +186,14 @@ public class PaywayPanel extends JPanel{
 	public PayWay getPayway() {
 		return payway;
 	}
-
-	public double getMoneyAmount(){
+	
+	public double getPaidMoney(){
 		if (tfGetPay.getText() == null || tfGetPay.getText().length() == 0)
 			return 0;
-		else return Double.parseDouble(tfGetPay.getText());
+		return Double.parseDouble(tfGetPay.getText());
 	}
 	
-	public double getChangeAmount(){
-		if (tfGetPay.getText() == null || tfGetPay.getText().length() == 0)
-			return 0;
-		double value = Double.parseDouble(tfGetPay.getText());
-		return value / payway.getRate() - orderPrice;
+	public double getChange(){
+		return change;
 	}
 }

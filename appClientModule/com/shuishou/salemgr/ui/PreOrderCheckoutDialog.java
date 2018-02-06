@@ -123,7 +123,7 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 		if (!mainFrame.getPaywayList().isEmpty()){
 			for (int i = 0; i < mainFrame.getPaywayList().size(); i++) {
 				PayWay pw = mainFrame.getPaywayList().get(i);
-				PaywayPanel pp = new PaywayPanel(pw, sellPrice);
+				PaywayPanel pp = new PaywayPanel(this, pw, sellPrice);
 				bgPayway.add(pp.getRadioButton());
 				if (i == 0){
 					pp.setSelected(true);
@@ -386,7 +386,8 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 			member = HttpUtil.doLoadMember(PreOrderCheckoutDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
 			//store into local memory
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
-			keyMap.put("member", member.getMemberCard() + "  point : "+ CommonTools.transferDouble2Scale(member.getScore()) + "  discount rate: " + (member.getDiscountRate() * 100) + "%");
+			keyMap.put("member", member.getMemberCard() + ", "+ member.getName() + String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) 
+					+ ", " + (member.getDiscountRate() * 100) + "%");
 		}else {
 			keyMap.put("member", "");
 			keyMap.put("discount", "");
@@ -403,8 +404,11 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 		}
 		PaywayPanel paywayPanel = getChoosedPayWayPanel();
 		String symbol = paywayPanel.getPayway().getSymbol().replace("$", "\\$");
-		keyMap.put("paid", symbol + paywayPanel.getMoneyAmount());
-		keyMap.put("change", CommonTools.transferDouble2Scale(paywayPanel.getChangeAmount()));
+		keyMap.put("paid", symbol + paywayPanel.getPaidMoney());
+		if (paywayPanel.getChange() <= 0)
+			keyMap.put("change", "");
+		else 
+			keyMap.put("change", symbol + CommonTools.transferDouble2Scale(paywayPanel.getChange()));
 		List<Map<String, String>> goods = new ArrayList<>();
 		for (int i = 0; i< indent.getItems().size(); i++) {
 			IndentDetail detail = indent.getItems().get(i);

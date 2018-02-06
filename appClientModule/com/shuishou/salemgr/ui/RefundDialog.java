@@ -200,7 +200,8 @@ public class RefundDialog extends CommonDialog{
 			member = HttpUtil.doLoadMember(RefundDialog.this, mainFrame.getOnDutyUser(), member.getMemberCard());
 			//store into local memory
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
-			keyMap.put("member", member.getMemberCard() + ", points: "+ CommonTools.transferDouble2Scale(member.getScore()) + ", discount: " + (member.getDiscountRate() * 100) + "%");
+			keyMap.put("member", member.getMemberCard() + ", "+ member.getName() + String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) 
+			+ ", " + (member.getDiscountRate() * 100) + "%");
 		}else {
 			keyMap.put("member", "");
 		}

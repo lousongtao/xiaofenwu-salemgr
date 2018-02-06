@@ -110,6 +110,33 @@ public class ChangeGoodsPriceDialog extends CommonDialog implements ActionListen
 				}
 			}
 		});
+		tfModifiedPrice.addKeyListener(new KeyAdapter(){
+			public void keyPressed(KeyEvent e) {
+				if (e.getID() != KeyEvent.KEY_PRESSED)
+					return;
+				if (e.getKeyCode() == KeyEvent.VK_ENTER){
+					doConfirm();
+				} 
+			}
+		});
+		tfDiscount.addKeyListener(new KeyAdapter(){
+			public void keyPressed(KeyEvent e) {
+				if (e.getID() != KeyEvent.KEY_PRESSED)
+					return;
+				if (e.getKeyCode() == KeyEvent.VK_ENTER){
+					doConfirm();
+				} 
+			}
+		});
+		tfQuantity.addKeyListener(new KeyAdapter(){
+			public void keyPressed(KeyEvent e) {
+				if (e.getID() != KeyEvent.KEY_PRESSED)
+					return;
+				if (e.getKeyCode() == KeyEvent.VK_ENTER){
+					doConfirm();
+				} 
+			}
+		});
 		tfDiscount.getDocument().addDocumentListener(new DocumentListener() {
 
 			@Override
@@ -135,7 +162,11 @@ public class ChangeGoodsPriceDialog extends CommonDialog implements ActionListen
 	private void calculateDiscountPrice(){
 		if (tfDiscount.getText() == null || tfDiscount.getText().length() == 0)
 			return;
-		tfModifiedPrice.setText(String.format(ConstantValue.FORMAT_DOUBLE, Double.parseDouble(tfDiscount.getText()) /100 * goods.getSellPrice()));
+		double discount = 0;
+		try{
+			discount = Double.parseDouble(tfDiscount.getText());
+		} catch(Exception e){}
+		tfModifiedPrice.setText(String.format(ConstantValue.FORMAT_DOUBLE, discount /100 * goods.getSellPrice()));
 	}
 	
 	public boolean isCancel() {
