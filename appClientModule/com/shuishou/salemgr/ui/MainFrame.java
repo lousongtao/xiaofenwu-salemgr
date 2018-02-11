@@ -553,8 +553,10 @@ public class MainFrame extends JFrame implements ActionListener{
 		double originPrice = cg.goods.getSellPrice();
 		if (cg.modifiedPrice > 0)
 			originPrice = cg.modifiedPrice;
-		else if (member != null)
+		else if (member != null){
 			originPrice = cg.goods.getSellPrice() * member.getDiscountRate();
+			originPrice = Double.parseDouble(CommonTools.transferDouble2Scale(originPrice));//剔除过长的小数位
+		}
 		int originQuantity = cg.amount;
 		double originDiscount = 100;
 //		if (member != null)
@@ -562,7 +564,9 @@ public class MainFrame extends JFrame implements ActionListener{
 		dlg.setValue(originPrice, originQuantity, originDiscount);
 		dlg.setVisible(true);
 		if (!dlg.isCancel()){
-			cg.modifiedPrice = dlg.getModifiedPrice();
+			if (dlg.getModifiedPrice() != originPrice){
+				cg.modifiedPrice = dlg.getModifiedPrice();
+			}
 			cg.amount = dlg.getQuantity();
 			
 			modelGoods.fireTableDataChanged();
