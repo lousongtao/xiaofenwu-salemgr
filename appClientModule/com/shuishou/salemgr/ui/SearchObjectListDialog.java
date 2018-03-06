@@ -10,16 +10,19 @@ import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableCellRenderer;
 
 import com.shuishou.salemgr.Messages;
 import com.shuishou.salemgr.beans.Goods;
 import com.shuishou.salemgr.ui.components.CommonDialog;
+import com.shuishou.salemgr.ui.components.DefaultTableCellHeaderRenderer;
 
 public class SearchObjectListDialog extends CommonDialog{
 
@@ -46,6 +49,15 @@ public class SearchObjectListDialog extends CommonDialog{
 		table.getColumnModel().getColumn(1).setPreferredWidth(200);
 		table.getColumnModel().getColumn(2).setPreferredWidth(100);
 		table.getColumnModel().getColumn(3).setPreferredWidth(100);
+		// 设置table表头居中
+	    DefaultTableCellHeaderRenderer thr = new DefaultTableCellHeaderRenderer();
+	    thr.setHorizontalAlignment(JLabel.CENTER);
+	    table.getTableHeader().setDefaultRenderer(thr);
+	    // 设置table内容居中
+	    DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
+	    tcr.setHorizontalAlignment(JLabel.CENTER);
+	    table.setDefaultRenderer(Object.class, tcr);
+	    
 		JScrollPane jspTable = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		JButton btnConfirm = new JButton("Choose");
 		JButton btnCancel = new JButton("Cancel");

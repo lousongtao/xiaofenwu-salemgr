@@ -70,6 +70,7 @@ import com.shuishou.salemgr.beans.PayWay;
 import com.shuishou.salemgr.beans.UserData;
 import com.shuishou.salemgr.http.HttpUtil;
 import com.shuishou.salemgr.printertool.PrintThread;
+import com.shuishou.salemgr.ui.components.DefaultTableCellHeaderRenderer;
 import com.shuishou.salemgr.ui.components.IconButton;
 import com.shuishou.salemgr.ui.components.JBlockedButton;
 import com.shuishou.salemgr.ui.components.NumberTextField;
@@ -151,25 +152,13 @@ public class MainFrame extends JFrame implements ActionListener{
 		tableGoods.getColumnModel().getColumn(3).setPreferredWidth(50);//sell price
 		tableGoods.getColumnModel().getColumn(4).setPreferredWidth(50);//member discount price
 		tableGoods.getColumnModel().getColumn(5).setPreferredWidth(50);//modified price
-		tableGoods.setDefaultRenderer(Object.class, new DefaultTableCellRenderer(){
-			@Override
-		    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
-		    {
-		        final Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-		        if (isSelected){
-		        	super.setForeground(table.getSelectionForeground());
-		        	super.setBackground(table.getSelectionBackground());
-		        } else {
-			        c.setForeground(Color.black);
-			        ChoosedGoods cg = modelGoods.getObjectAt(row);
-			        if (cg.amount < 0)
-			        	c.setBackground(Color.lightGray);
-			        else 
-			        	c.setBackground(Color.white);
-		        }
-		        return c;
-		    }
-		});
+		GoodsTableCellRenderer cellRender = new GoodsTableCellRenderer();
+		cellRender.setHorizontalAlignment(JLabel.CENTER);
+		tableGoods.setDefaultRenderer(Object.class,  cellRender);
+		DefaultTableCellHeaderRenderer thr = new DefaultTableCellHeaderRenderer();
+	    thr.setHorizontalAlignment(JLabel.CENTER);
+	    tableGoods.getTableHeader().setDefaultRenderer(thr);
+	    
 		JScrollPane jspGoods = new JScrollPane(tableGoods, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		popupMenu.add(miDeleteItem);
 		popupMenu.add(miDeleteAllItem);
@@ -1019,6 +1008,8 @@ public class MainFrame extends JFrame implements ActionListener{
 				e.printStackTrace();
 			}
 		});
+		StartingWaitDialog waitDlg = new StartingWaitDialog();
+		waitDlg.setVisible(true);
 		
 		//load properties
 		Properties prop = new Properties();
@@ -1079,6 +1070,7 @@ public class MainFrame extends JFrame implements ActionListener{
 				}
 			}
 		});
+		waitDlg.setVisible(false);
 		f.setVisible(true);
 		f.startLogin(prop.getProperty("defaultuser.name"), prop.getProperty("defaultuser.password"));
 	}
@@ -1110,7 +1102,27 @@ public class MainFrame extends JFrame implements ActionListener{
 				}
 			}
 		}
-		
-		
+	}
+	
+	class GoodsTableCellRenderer extends DefaultTableCellRenderer{
+		private Color txtColor = new Color(151, 151, 151);
+		@Override
+	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+	    {
+	        final Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+	        if (isSelected){
+	        	super.setForeground(table.getSelectionForeground());
+	        	super.setBackground(table.getSelectionBackground());
+	        } else {
+		        c.setForeground(Color.black);
+//	        	c.setForeground(txtColor);
+		        ChoosedGoods cg = modelGoods.getObjectAt(row);
+		        if (cg.amount < 0)
+		        	c.setBackground(Color.lightGray);
+		        else 
+		        	c.setBackground(Color.white);
+	        }
+	        return c;
+	    }
 	}
 }
