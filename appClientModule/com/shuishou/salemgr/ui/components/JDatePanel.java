@@ -37,6 +37,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.text.DateFormat;
@@ -1013,7 +1014,9 @@ public class JDatePanel extends JComponent implements DatePanel {
          * Part of TableModel, day
          */
         public String getColumnName(int columnIndex) {
-            ComponentTextDefaults.Key key = ComponentTextDefaults.Key.getDowKey(((firstDayOfWeek - 1) + columnIndex) % 7);
+        	//TODO:原作者在firstDayofWeek基础上减一, 不知什么原因, 导致真正日期跟星期差一天. 在东八区测试, 不知道跟这个时区有没有关系
+//          ComponentTextDefaults.Key key = ComponentTextDefaults.Key.getDowKey(((firstDayOfWeek - 1) + columnIndex) % 7);
+        	ComponentTextDefaults.Key key = ComponentTextDefaults.Key.getDowKey((firstDayOfWeek + columnIndex) % 7);
             return getTexts().getText(key);
         }
 
