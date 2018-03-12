@@ -8,6 +8,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -44,7 +45,7 @@ public class NoBarcodeGoodsDialog extends CommonDialog implements ActionListener
 	private JButton btnRemove = new JButton(Messages.getString("Delete"));
 	private JButton btnClose = new JButton(Messages.getString("CloseDialog"));
 	private JBlockedButton btnConfirm = new JBlockedButton(Messages.getString("ConfirmDialog"), null);
-	private JPanel pGoods = new JPanel(new FlowLayout(FlowLayout.LEFT));
+	private JPanel pGoods = new JPanel(new GridBagLayout());
 	private JList<ChoosedGoods> listChoosedGoods = new JList<>();
 	private ListModel<ChoosedGoods> listModelChoosedGoods = new ListModel<>();
 	private ArrayList<Category2> listCategory2 = new ArrayList<>();
@@ -69,12 +70,13 @@ public class NoBarcodeGoodsDialog extends CommonDialog implements ActionListener
 		JScrollPane jspChooseGoods = new JScrollPane(listChoosedGoods, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		pGoods.setBorder(BorderFactory.createTitledBorder("Goods"));
 		pGoods.setBackground(Color.white);
+		JScrollPane jspGoods = new JScrollPane(pGoods, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		JPanel pGoodsDishplay = new JPanel(new GridBagLayout());
 		
 		JPanel pCategory2 = generateCategory2Panel();
 		
 		pGoodsDishplay.add(pCategory2, 	new GridBagConstraints(0, 0, 1, 1, 1, 0.2, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
-		pGoodsDishplay.add(pGoods, 		new GridBagConstraints(0, 1, 1, 1, 1, 0.5, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
+		pGoodsDishplay.add(jspGoods, 	new GridBagConstraints(0, 1, 1, 1, 1, 0.5, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
 		
 		JPanel pChoosedGoods = new JPanel(new GridBagLayout());
 		pChoosedGoods.add(jspChooseGoods, 	new GridBagConstraints(0, 2, 2, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
@@ -140,6 +142,7 @@ public class NoBarcodeGoodsDialog extends CommonDialog implements ActionListener
 	}
 	
 	private void doCategory2ButtonClick(Category2 c2){
+		int amountPerRow = 4;
 		pGoods.removeAll();
 		if (c2.getGoods() == null)
 			return;
@@ -147,7 +150,7 @@ public class NoBarcodeGoodsDialog extends CommonDialog implements ActionListener
 			Goods g = c2.getGoods().get(i);
 			if (g.getBarcode() == null || g.getBarcode().length() == 0){
 				GoodsButton btn = new GoodsButton(g);
-				pGoods.add(btn);
+				pGoods.add(btn, new GridBagConstraints(i % amountPerRow, (int) i / amountPerRow, 1, 1, 1, 0.2, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 			}
 			
 		}
