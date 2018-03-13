@@ -239,6 +239,8 @@ public class PreorderMgmtDialog extends CommonDialog implements ActionListener{
 		keyMap.put("orderNo", indent.getIndentCode());
 		keyMap.put("paid", "");
 		keyMap.put("change", "");
+		keyMap.put("adjustPrice", "");
+		keyMap.put("discountTemp", "");
 		List<Map<String, String>> goods = new ArrayList<>();
 		double originPrice = 0;
 		for (int i = 0; i< indent.getItems().size(); i++) {

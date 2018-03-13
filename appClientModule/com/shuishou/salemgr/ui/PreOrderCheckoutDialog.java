@@ -397,6 +397,8 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 		keyMap.put("totalPrice", CommonTools.transferNumberByPM(indent.getPaidPrice(), ""));
 		keyMap.put("gst", CommonTools.transferNumberByPM(indent.getPaidPrice()/11, ""));
 		keyMap.put("orderNo", indent.getIndentCode());
+		keyMap.put("adjustPrice", "");
+		keyMap.put("discountTemp", "");
 		if (paid){
 			keyMap.put("payWay", indent.getPayWay());
 		} else {
