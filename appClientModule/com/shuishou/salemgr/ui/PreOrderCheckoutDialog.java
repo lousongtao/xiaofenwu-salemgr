@@ -54,6 +54,7 @@ import com.shuishou.salemgr.printertool.PrintQueue;
 import com.shuishou.salemgr.ui.components.CommonDialog;
 import com.shuishou.salemgr.ui.components.JBlockedButton;
 import com.shuishou.salemgr.ui.components.NumberTextField;
+import com.shuishou.salemgr.ui.components.WaitDialog;
 import com.shuishou.salemgr.ui.uibean.ChoosedGoods;
 
 public class PreOrderCheckoutDialog extends CommonDialog{
@@ -334,8 +335,8 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 				jo.put("soldPrice", String.format(ConstantValue.FORMAT_DOUBLE, cg.goods.getSellPrice() * member.getDiscountRate()));
 			ja.put(jo);
 		}
-		String url = "indent/prebuyindent";
-		Map<String, String> params = new HashMap<>();
+		final String url = "indent/prebuyindent";
+		final Map<String, String> params = new HashMap<>();
 		params.put("userId", mainFrame.getOnDutyUser().getId() + "");
 		params.put("indents", ja.toString());
 		if (member == null){
@@ -354,8 +355,12 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 		if (!paid)
 			params.put("payWay", "");
 		params.put("paid", String.valueOf(paid));
-		
-		String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
+		WaitDialog wdlg = new WaitDialog(this, "Posting data..."){
+			public Object work() {
+				return HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
+			}
+		};
+		String response = (String)wdlg.getReturnResult();
 		if (response == null){
 			logger.error("get null from server for doing pay. URL = " + url);
 			JOptionPane.showMessageDialog(this, "get null from server for doing pay. URL = " + url);

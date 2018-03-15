@@ -57,6 +57,7 @@ import com.shuishou.salemgr.printertool.PrintQueue;
 import com.shuishou.salemgr.ui.components.CommonDialog;
 import com.shuishou.salemgr.ui.components.JBlockedButton;
 import com.shuishou.salemgr.ui.components.NumberTextField;
+import com.shuishou.salemgr.ui.components.WaitDialog;
 import com.shuishou.salemgr.ui.uibean.ChoosedGoods;
 
 public class CheckoutDialog extends CommonDialog{
@@ -370,7 +371,7 @@ public class CheckoutDialog extends CommonDialog{
 			}
 		}
 		
-		Map<String, String> params = new HashMap<String, String>();
+		final Map<String, String> params = new HashMap<String, String>();
 		params.put("userId", mainFrame.getOnDutyUser().getId() + "");
 		
 		if (member !=null)
@@ -387,11 +388,16 @@ public class CheckoutDialog extends CommonDialog{
 		}
 		Indent indent = null;//use this indent to collect all of the indent.items
 		if (existingOrder){
-			String url = "indent/makeindent";
+			final String url = "indent/makeindent";
 			params.put("paidPrice", String.format(ConstantValue.FORMAT_DOUBLE, paidPrice4Order + (discountPrice - sellPrice)));
 			params.put("adjustPrice", String.format(ConstantValue.FORMAT_DOUBLE, discountPrice - sellPrice));
 			params.put("indents", ja_order.toString());
-			String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
+			WaitDialog wdlg = new WaitDialog(this, "Posting data..."){
+				public Object work() {
+					return HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
+				}
+			};
+			String response = (String)wdlg.getReturnResult();
 			if (response == null){
 				logger.error("get null from server for doing pay. URL = " + url);
 				JOptionPane.showMessageDialog(this, "get null from server for doing pay. URL = " + url);
@@ -411,12 +417,17 @@ public class CheckoutDialog extends CommonDialog{
 			}
 		}
 		if (existingRefund){
-			String url = "indent/refundindent";
+			final String url = "indent/refundindent";
 			params.put("paidPrice", String.format(ConstantValue.FORMAT_DOUBLE, paidPrice4Refund));
 			params.put("indents", ja_refund.toString());
 			params.put("returnToStorage", String.valueOf(true));
 			params.put("refundPrice", "");
-			String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
+			WaitDialog wdlg = new WaitDialog(this, "Posting data..."){
+				public Object work() {
+					return HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "UTF-8");
+				}
+			};
+			String response = (String)wdlg.getReturnResult();
 			if (response == null){
 				logger.error("get null from server for doing refund. URL = " + url);
 				JOptionPane.showMessageDialog(this, "get null from server for doing refund. URL = " + url);
