@@ -67,6 +67,7 @@ import com.shuishou.salemgr.beans.DiscountTemplate;
 import com.shuishou.salemgr.beans.Goods;
 import com.shuishou.salemgr.beans.Member;
 import com.shuishou.salemgr.beans.PayWay;
+import com.shuishou.salemgr.beans.Promotion;
 import com.shuishou.salemgr.beans.UserData;
 import com.shuishou.salemgr.http.HttpUtil;
 import com.shuishou.salemgr.printertool.PrintThread;
@@ -124,11 +125,12 @@ public class MainFrame extends JFrame implements ActionListener{
 //	private JMenuItem miChangeAmount = new JMenuItem(Messages.getString("MainFrame.ChangeAmount"));
 	
 	private ArrayList<DiscountTemplate> discountTemplateList = new ArrayList<>(); 
+	private ArrayList<Promotion> promotionList = new ArrayList<>();
 	private ArrayList<PayWay> paywayList = new ArrayList<>(); 
 	private UserData onDutyUser = null;//在值班状态用户名称
 	private HashMap<String, String> configsMap;
 	private JTable tableGoods = new JTable();
-	private GoodsTableModel modelGoods = new GoodsTableModel();
+	private GoodsTableModel modelGoods = new GoodsTableModel(this);
 	private HashMap<String, Goods> mapGoods;//key = barcode
 	private ArrayList<Goods> listNoBarcodeGoods = new ArrayList<>();
 	private HashMap<String, Member> mapMember;
@@ -350,6 +352,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		loadConfigsMap();
 		initRefreshTimer();
 		loadPayWay();
+		loadPromotion();
 	}
 	
 	private void initRefreshTimer(){
@@ -490,6 +493,16 @@ public class MainFrame extends JFrame implements ActionListener{
 			discountTemplateList.addAll(dts);
 	}
 	
+	private void loadPromotion(){
+		ArrayList<Promotion> ps = HttpUtil.loadPromotion(this);
+		promotionList.clear();
+		if (ps != null)
+			promotionList.addAll(ps);
+	}
+	
+	public ArrayList<Promotion> getPromotionList(){
+		return promotionList;
+	}
 	private void loadPayWay(){
 		ArrayList<PayWay> pws = HttpUtil.loadPayWay(this);
 		paywayList.clear();
@@ -664,6 +677,14 @@ public class MainFrame extends JFrame implements ActionListener{
 		modelGoods.addItem(cg);
 		modelGoods.fireTableDataChanged();
 		calculatePrice();
+	}
+	
+	/**
+	 * 商品加入购物列表
+	 * @param goods
+	 */
+	private void addGoodsIntoCart(Goods goods){
+		
 	}
 	
 	private Goods lookforAnObjectByName(String name){

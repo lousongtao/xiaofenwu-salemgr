@@ -405,7 +405,7 @@ public class CheckoutDialog extends CommonDialog{
 			}
 			Gson gson = new GsonBuilder().setDateFormat(ConstantValue.DATE_PATTERN_YMDHMS).create();
 			HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
-			if (!result.success){
+			if (result == null || !result.success){
 				logger.error("return false while doing pay. URL = " + url + ", response = "+response);
 				JOptionPane.showMessageDialog(this, "return false while doing pay. URL = " + url + ", response = "+response);
 				return;
@@ -435,7 +435,7 @@ public class CheckoutDialog extends CommonDialog{
 			}
 			Gson gson = new GsonBuilder().setDateFormat(ConstantValue.DATE_PATTERN_YMDHMS).create();
 			HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
-			if (!result.success){
+			if (result == null || !result.success){
 				logger.error("return false while doing refund. URL = " + url + ", response = "+response);
 				JOptionPane.showMessageDialog(this, "return false while doing refund. URL = " + url + ", response = "+response);
 				return;

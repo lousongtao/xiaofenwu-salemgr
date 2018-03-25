@@ -111,6 +111,16 @@ public class ConstantValue {
 	public static final byte INDENT_TYPE_REFUND = 2;//退货单
 	public static final byte INDENT_TYPE_PREBUY_PAID = 3;//预购单已付款
 	public static final byte INDENT_TYPE_PREBUY_UNPAID = 4;//预购单未付款
+	
 	public static final int INDENT_TYPE_PREBUY_FINISHED = 5;//预购单完结,已经转为订单
 	public static final int INDENT_TYPE_ORDER_FROMPREBUY = 6;//预购单完结,已经转为订单
+	
+	public static final int PROMOTION_GOODS = 1;
+	public static final int PROMOTION_CATEGORY2 = 2;
+	public static final int PROMOTION_CATEGORY1 = 3;
+	
+	public static final int PROMOTION_REWARD_BUYNREDUCEPRICE = 1; //买n个, 直接折扣x元
+	public static final int PROMOTION_REWARD_BUYNDISCOUNT = 2; //买n个, 给予百分比折扣
+	public static final int PROMOTION_REWARD_BUYNNEXTREDUCEPRICE = 3; //买n个, 下一个直接折扣x元
+	public static final int PROMOTION_REWARD_BUYNNEXTDISCOUNT = 4; //买n个, 下一个给予百分比折扣
 }
