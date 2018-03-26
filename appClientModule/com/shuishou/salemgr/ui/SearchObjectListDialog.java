@@ -48,7 +48,7 @@ public class SearchObjectListDialog extends CommonDialog{
 		table.getColumnModel().getColumn(0).setPreferredWidth(300);
 		table.getColumnModel().getColumn(1).setPreferredWidth(200);
 		table.getColumnModel().getColumn(2).setPreferredWidth(100);
-		table.getColumnModel().getColumn(3).setPreferredWidth(100);
+//		table.getColumnModel().getColumn(3).setPreferredWidth(100);
 		// 设置table表头居中
 	    DefaultTableCellHeaderRenderer thr = new DefaultTableCellHeaderRenderer();
 	    thr.setHorizontalAlignment(JLabel.CENTER);
@@ -114,7 +114,7 @@ public class SearchObjectListDialog extends CommonDialog{
 		private String[] header = new String[]{
 				Messages.getString("SearchObjectListDialog.Header.Name"),
 				Messages.getString("SearchObjectListDialog.Header.Barcode"),
-				Messages.getString("SearchObjectListDialog.Header.MemberPrice"),
+//				Messages.getString("SearchObjectListDialog.Header.MemberPrice"),
 				Messages.getString("SearchObjectListDialog.Header.SellPrice"),
 		};
 
@@ -144,9 +144,9 @@ public class SearchObjectListDialog extends CommonDialog{
 				return g.getName();
 			case 1:
 				return g.getBarcode();
+//			case 2:
+//				return g.getMemberPrice();
 			case 2:
-				return g.getMemberPrice();
-			case 3:
 				return g.getSellPrice();
 			}
 			return "";
