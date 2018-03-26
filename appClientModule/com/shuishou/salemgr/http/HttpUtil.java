@@ -46,6 +46,7 @@ import com.shuishou.salemgr.beans.HttpResult;
 import com.shuishou.salemgr.beans.Indent;
 import com.shuishou.salemgr.beans.Member;
 import com.shuishou.salemgr.beans.PayWay;
+import com.shuishou.salemgr.beans.Promotion;
 import com.shuishou.salemgr.beans.UserData;
 import com.shuishou.salemgr.ui.MainFrame;
 
@@ -257,6 +258,23 @@ public class HttpUtil {
 		if (!result.success){
 			logger.error("return false while get discount templates. URL = " + url + ", response = "+response);
 			JOptionPane.showMessageDialog(parent, "return false while get discount templates. URL = " + url + ", response = "+response);
+			return null;
+		}
+		return result.data;
+	}
+    
+    public static ArrayList<Promotion> loadPromotion(MainFrame parent){
+		String url = "promotion/queryallpromotion";
+		String response = HttpUtil.getJSONObjectByGet(MainFrame.SERVER_URL + url);
+		if (response == null){
+			logger.error("get null from server for promotion. URL = " + url);
+			JOptionPane.showMessageDialog(parent, "get null from server for promotion. URL = " + url);
+			return null;
+		}
+		HttpResult<ArrayList<Promotion>> result = new Gson().fromJson(response, new TypeToken<HttpResult<ArrayList<Promotion>>>(){}.getType());
+		if (!result.success){
+			logger.error("return false while get promotion. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, "return false while get promotion. URL = " + url + ", response = "+response);
 			return null;
 		}
 		return result.data;

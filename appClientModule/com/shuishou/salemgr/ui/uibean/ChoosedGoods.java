@@ -4,6 +4,10 @@ import com.shuishou.salemgr.beans.Goods;
 
 public class ChoosedGoods {
 
+	/**
+	 * 判断该项是否已经在促销组合中, 默认值false
+	 */
+	public boolean inPromotion = false;
 	public Goods goods;
 	public int amount;
 	/**
