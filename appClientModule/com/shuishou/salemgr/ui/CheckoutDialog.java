@@ -306,7 +306,10 @@ public class CheckoutDialog extends CommonDialog{
 				discountTempRadioButtonList.get(0).setSelected(true);
 				rbTemplate = discountTempRadioButtonList.get(0);
 			}
-			discountPrice = sellPrice * rbTemplate.getDiscountTemplate().getRate();
+			if (rbTemplate.getDiscountTemplate().getType() == ConstantValue.DISCOUNTTYPE_RATE)
+				discountPrice = sellPrice * rbTemplate.getDiscountTemplate().getValue();
+			else if (rbTemplate.getDiscountTemplate().getType() == ConstantValue.DISCOUNTTYPE_QUANTITY)
+				discountPrice = sellPrice + rbTemplate.getDiscountTemplate().getValue();
 		} 
 		for(PaywayPanel pp : listPaywayPanel){
 			pp.setOrderPrice(discountPrice);
@@ -385,6 +388,18 @@ public class CheckoutDialog extends CommonDialog{
 			return;
 		} else {
 			params.put("payWay", payway.getName());
+		}
+		if (rbDiscountNon.isSelected()){
+			params.put("discountTemplate", "");
+		} else if (rbDiscountDirect.isSelected()){
+			params.put("discountTemplate", tfDiscountAmount.getText());
+		} else {
+			DiscountTemplateRadioButton rbTemplate = getSelectedDiscountTemplateRadioButton();
+			if (rbTemplate == null){
+				discountTempRadioButtonList.get(0).setSelected(true);
+				rbTemplate = discountTempRadioButtonList.get(0);
+			}
+			params.put("discountTemplate", String.valueOf(rbTemplate.getDiscountTemplate().getName()));
 		}
 		Indent indent = null;//use this indent to collect all of the indent.items
 		if (existingOrder){
@@ -465,7 +480,7 @@ public class CheckoutDialog extends CommonDialog{
 			mainFrame.getMapMember().put(member.getMemberCard(), member);
 			keyMap.put("member", member.getMemberCard() + ", "+ member.getName() +", "+ String.format(ConstantValue.FORMAT_DOUBLE, member.getScore()) 
 			+ ", " + (member.getDiscountRate() * 100) + "%");
-		}else {
+		} else {
 			keyMap.put("member", "");
 		}
 		keyMap.put("cashier", indent.getOperator());
@@ -482,7 +497,7 @@ public class CheckoutDialog extends CommonDialog{
 		DiscountTemplateRadioButton disRB = this.getSelectedDiscountTemplateRadioButton();
 		if (disRB != null){
 			//小粉屋搞活动, 想把折扣显示出来, 这里如果选择了某个折扣模板, 就打印这一行
-			keyMap.put("discountTemp", "Discount:     " + (disRB.getDiscountTemplate().getRate() * 100) + "%");
+			keyMap.put("discountTemp", "Discount:     " + (disRB.getDiscountTemplate().getValue() * 100) + "%");
 		}
 		PaywayPanel paywayPanel = getChoosedPayWayPanel();
 		String symbol = paywayPanel.getPayway().getSymbol().replace("$", "\\$");
