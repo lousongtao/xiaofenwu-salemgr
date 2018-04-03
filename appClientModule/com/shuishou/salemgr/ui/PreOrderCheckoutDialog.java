@@ -51,6 +51,7 @@ import com.shuishou.salemgr.beans.PayWay;
 import com.shuishou.salemgr.http.HttpUtil;
 import com.shuishou.salemgr.printertool.PrintJob;
 import com.shuishou.salemgr.printertool.PrintQueue;
+import com.shuishou.salemgr.ui.CheckoutDialog.DiscountTemplateRadioButton;
 import com.shuishou.salemgr.ui.components.CommonDialog;
 import com.shuishou.salemgr.ui.components.JBlockedButton;
 import com.shuishou.salemgr.ui.components.NumberTextField;
@@ -67,7 +68,7 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 	private JRadioButton rbDiscountDirect = new JRadioButton(Messages.getString("CheckoutDialog.DirectDiscount"), false); //$NON-NLS-1$
 	private ArrayList<JRadioButton> listRBOtherPayway = new ArrayList<>();
 	private ArrayList<PaywayPanel> listPaywayPanel = new ArrayList<>();
-	private NumberTextField tfDiscountPrice = null;
+	private NumberTextField tfDiscountAmount = null;
 	private JBlockedButton btnPay = new JBlockedButton(Messages.getString("CheckoutDialog.PayButton"), "/resource/checkout.png"); //$NON-NLS-1$
 	private JButton btnClose = new JButton(Messages.getString("CloseDialog")); //$NON-NLS-1$
 	private JButton btnUnpay = new JButton(Messages.getString("PreOrderCheckoutDialog.UnpayButton")); //$NON-NLS-1$
@@ -112,7 +113,7 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + CommonTools.transferDouble2Scale(member.getScore()) + ", "
 				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + CommonTools.transferDouble2Scale(member.getBalanceMoney()));
 		}
-		tfDiscountPrice = new NumberTextField(this, true, false);
+		tfDiscountAmount = new NumberTextField(this, true, false);
 		
 		tfGetCash = new NumberTextField(this, true, false);
 		JLabel lbGetCash = new JLabel(Messages.getString("CheckoutDialog.GetCash"));
@@ -158,9 +159,9 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 			}
 		}
 		
-		Dimension dDiscountPrice = tfDiscountPrice.getPreferredSize();
+		Dimension dDiscountPrice = tfDiscountAmount.getPreferredSize();
 		dDiscountPrice.width = 150;
-		tfDiscountPrice.setPreferredSize(dDiscountPrice);
+		tfDiscountAmount.setPreferredSize(dDiscountPrice);
 		
 		JPanel pDiscount = new JPanel(new GridBagLayout());
 //		pDiscount.setBackground(bgDiscountColor);
@@ -171,7 +172,7 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 		bgDiscount.add(rbDiscountDirect);
 		pDiscount.add(rbDiscountNon, 	new GridBagConstraints(0, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
 		pDiscount.add(rbDiscountDirect, new GridBagConstraints(1, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 50, 0, 0), 0, 0));
-		pDiscount.add(tfDiscountPrice, 	new GridBagConstraints(2, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 20, 0, 0), 0, 0));
+		pDiscount.add(tfDiscountAmount, new GridBagConstraints(2, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 20, 0, 0), 0, 0));
 		pDiscount.add(rbDiscountTemp, 	new GridBagConstraints(3, 0, 1, 1, 0, 1, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10, 50, 0, 0), 0, 0));
 		pDiscount.add(pDiscountTemplate,new GridBagConstraints(0, 2, 4, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10, 0, 0, 0), 0, 0));
 		
@@ -226,7 +227,7 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 				doMakePreOrder(false);
 			}});
 		
-		tfDiscountPrice.getDocument().addDocumentListener(new DocumentListener(){
+		tfDiscountAmount.getDocument().addDocumentListener(new DocumentListener(){
 
 			@Override
 			public void insertUpdate(DocumentEvent e) {
@@ -292,11 +293,14 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 				discountTempRadioButtonList.get(0).setSelected(true);
 				rbTemplate = discountTempRadioButtonList.get(0);
 			}
-			discountPrice = sellPrice * rbTemplate.getDiscountTemplate().getRate();
+			if (rbTemplate.getDiscountTemplate().getType() == ConstantValue.DISCOUNTTYPE_RATE)
+				discountPrice = sellPrice * rbTemplate.getDiscountTemplate().getValue();
+			else if (rbTemplate.getDiscountTemplate().getType() == ConstantValue.DISCOUNTTYPE_QUANTITY)
+				discountPrice = sellPrice + rbTemplate.getDiscountTemplate().getValue();
 		} else if (rbDiscountDirect.isSelected()) {
 			double dp = 0;
 			try{
-				dp = Double.parseDouble(tfDiscountPrice.getText());
+				dp = Double.parseDouble(tfDiscountAmount.getText());
 			}catch(Exception e){}
 			discountPrice = sellPrice - dp;
 		}
@@ -354,6 +358,18 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 		}
 		if (!paid)
 			params.put("payWay", "");
+		if (rbDiscountNon.isSelected()){
+			params.put("discountTemplate", "");
+		} else if (rbDiscountDirect.isSelected()){
+			params.put("discountTemplate", tfDiscountAmount.getText());
+		} else {
+			DiscountTemplateRadioButton rbTemplate = getSelectedDiscountTemplateRadioButton();
+			if (rbTemplate == null){
+				discountTempRadioButtonList.get(0).setSelected(true);
+				rbTemplate = discountTempRadioButtonList.get(0);
+			}
+			params.put("discountTemplate", String.valueOf(rbTemplate.getDiscountTemplate().getName()));
+		}
 		params.put("paid", String.valueOf(paid));
 		WaitDialog wdlg = new WaitDialog(this, "Posting data..."){
 			public Object work() {

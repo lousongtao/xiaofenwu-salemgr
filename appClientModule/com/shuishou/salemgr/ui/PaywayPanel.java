@@ -156,7 +156,7 @@ public class PaywayPanel extends JPanel{
 		if (change < -0.01)
 			return;
 		lbChange.setText(Messages.getString("CheckoutDialog.Charge") + payway.getSymbol() + CommonTools.transferDouble2Scale(change));
-		System.out.println(lbChange.getText() + this.getPayway().getName());
+//		System.out.println(lbChange.getText() + this.getPayway().getName());
 	}
 	
 	public void setSelected(boolean b){
