@@ -65,7 +65,7 @@ public class GoodsTableModel extends DefaultTableModel{
 			return "";
 		case 5:
 			if (cg.modifiedPrice < 0) return "";
-			return cg.modifiedPrice;
+			return CommonTools.transferDouble2Scale(cg.modifiedPrice);
 		}
 		return "";
 	}
