@@ -426,6 +426,8 @@ public class HttpUtil {
 			JOptionPane.showMessageDialog(parent, "return false while query member by membercard. URL = " + url + ", response = "+response);
 			return null;
 		}
-		return result.data.get(0);
+		if (result.data != null && !result.data.isEmpty())
+			return result.data.get(0);
+		else return null;
 	}
 }

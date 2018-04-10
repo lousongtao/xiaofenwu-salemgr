@@ -54,9 +54,9 @@ public class SearchObjectListDialog extends CommonDialog{
 	    thr.setHorizontalAlignment(JLabel.CENTER);
 	    table.getTableHeader().setDefaultRenderer(thr);
 	    // 设置table内容居中
-	    DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
-	    tcr.setHorizontalAlignment(JLabel.CENTER);
-	    table.setDefaultRenderer(Object.class, tcr);
+//	    DefaultTableCellRenderer tcr = new DefaultTableCellRenderer();
+//	    tcr.setHorizontalAlignment(JLabel.LEFT);
+//	    table.setDefaultRenderer(Object.class, tcr);
 	    
 		JScrollPane jspTable = new JScrollPane(table, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		JButton btnConfirm = new JButton("Choose");

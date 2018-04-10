@@ -31,6 +31,7 @@ import com.shuishou.salemgr.http.HttpUtil;
 import com.shuishou.salemgr.ui.components.CommonDialog;
 import com.shuishou.salemgr.ui.components.JDatePicker;
 import com.shuishou.salemgr.ui.components.NumberTextField;
+import com.shuishou.salemgr.ui.components.WaitDialog;
 
 public class MemberDialog extends CommonDialog{
 
@@ -43,6 +44,7 @@ public class MemberDialog extends CommonDialog{
 	private NumberTextField tfDiscountRate= new NumberTextField(this, true, false);
 	private JButton btnSave = new JButton("Save");
 	private JButton btnCancel = new JButton("Cancel");
+	private JButton btnGenerateCard = new JButton("...");	
 	private JDatePicker dpBirthday = new JDatePicker();
 	private MainFrame mainFrame;
 	private Member member;
@@ -64,20 +66,21 @@ public class MemberDialog extends CommonDialog{
 		JLabel lbDiscountRate = new JLabel(Messages.getString("MemberDialog.DiscountRate"));
 		JPanel pProperty = new JPanel(new GridBagLayout());
 		pProperty.setLayout(new GridBagLayout());
-		pProperty.add(lbName, 		new GridBagConstraints(0, 0, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
-		pProperty.add(tfName, 		new GridBagConstraints(1, 0, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
+		pProperty.add(lbName, 			new GridBagConstraints(0, 0, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
+		pProperty.add(tfName, 			new GridBagConstraints(1, 0, 2, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
 		pProperty.add(lbMemberCard, 	new GridBagConstraints(0, 1, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
 		pProperty.add(tfMemberCard, 	new GridBagConstraints(1, 1, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
-		pProperty.add(lbTelephone, 	new GridBagConstraints(0, 2, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
-		pProperty.add(tfTelephone, 	new GridBagConstraints(1, 2, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
+		pProperty.add(btnGenerateCard, 	new GridBagConstraints(2, 1, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
+		pProperty.add(lbTelephone, 		new GridBagConstraints(0, 2, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
+		pProperty.add(tfTelephone, 		new GridBagConstraints(1, 2, 2, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
 		pProperty.add(lbAddress, 		new GridBagConstraints(0, 3, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
-		pProperty.add(tfAddress, 		new GridBagConstraints(1, 3, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
-		pProperty.add(lbPostcode, 	new GridBagConstraints(0, 4, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
-		pProperty.add(tfPostcode, 	new GridBagConstraints(1, 4, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
-		pProperty.add(lbBirthday, 	new GridBagConstraints(0, 5, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
-		pProperty.add(dpBirthday, 	new GridBagConstraints(1, 5, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
-		pProperty.add(lbDiscountRate, new GridBagConstraints(0, 6, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
-		pProperty.add(tfDiscountRate, new GridBagConstraints(1, 6, 1, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
+		pProperty.add(tfAddress, 		new GridBagConstraints(1, 3, 2, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
+		pProperty.add(lbPostcode, 		new GridBagConstraints(0, 4, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
+		pProperty.add(tfPostcode, 		new GridBagConstraints(1, 4, 2, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
+		pProperty.add(lbBirthday, 		new GridBagConstraints(0, 5, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
+		pProperty.add(dpBirthday, 		new GridBagConstraints(1, 5, 2, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
+		pProperty.add(lbDiscountRate, 	new GridBagConstraints(0, 6, 1, 1,0,0, GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(10,0,0,0), 0, 0));
+		pProperty.add(tfDiscountRate, 	new GridBagConstraints(1, 6, 2, 1,1,0, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10,0,0,0), 0, 0));
 		tfName.setMinimumSize(new Dimension(180,25));
 		
 		JPanel pButton = new JPanel();
@@ -102,6 +105,14 @@ public class MemberDialog extends CommonDialog{
 			public void actionPerformed(ActionEvent e) {
 				MemberDialog.this.setVisible(false);
 			}});
+		btnGenerateCard.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				generateMemberCard();
+			}
+			
+		});
 		tfDiscountRate.setText("1.00");
 		
 		this.setSize(new Dimension(350, 500));
@@ -109,11 +120,31 @@ public class MemberDialog extends CommonDialog{
 				(int)(mainFrame.getHeight() / 2 - this.getHeight() / 2 + mainFrame.getLocation().getY()));
 	}
 	
+	/**
+	 * 根据小粉屋的需求, 从160000开始向上编号, 找到一个空余的编号, 作为新会员的会员卡.
+	 * 先遍历本地数据, 查找到一个空闲的编号, 再用此编号去服务端查找, 看是否已经存在该编号的会员(因为存在分店已占用该编号的可能)
+	 */
+	private void generateMemberCard(){
+		int start = 160000;
+		for (int i = 0; i < 100000; i++) {
+			int temp = start + i;
+			Member m = mainFrame.getMapMember().get(String.valueOf(temp));
+			if (m == null){
+				//do double check to server
+				m = HttpUtil.doLoadMember(mainFrame, mainFrame.getOnDutyUser(), String.valueOf(temp));
+				if (m == null){
+					tfMemberCard.setText(String.valueOf(temp));
+					break;
+				}
+			}
+		}
+	}
+	
 	private boolean  doSave() {
 		if (!doCheckInput())
 			return false;
 		
-		Map<String, String> params = new HashMap<>();
+		final Map<String, String> params = new HashMap<>();
 		params.put("userId", mainFrame.getOnDutyUser().getId()+"");
 		params.put("name", tfName.getText());
 		params.put("memberCard", tfMemberCard.getText());
@@ -132,8 +163,14 @@ public class MemberDialog extends CommonDialog{
 			params.put("birth", ConstantValue.DFYMDHMS.format(c.getTime()));
 		}
 		
-		String url = "member/addmember";
-		String response = HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "utf-8");
+		final String url = "member/addmember";
+		WaitDialog wdlg = new WaitDialog(this, "Posting data..."){
+			public Object work() {
+				return HttpUtil.getJSONObjectByPost(MainFrame.SERVER_URL + url, params, "utf-8");
+			}
+		};
+		String response = (String)wdlg.getReturnResult();
+		
 		if (response == null){
 			logger.error("get null from server for add/update member. URL = " + url + ", param = "+ params);
 			JOptionPane.showMessageDialog(this, "get null from server for add/update member. URL = " + url);
