@@ -121,6 +121,7 @@ public class MainFrame extends JFrame implements ActionListener{
 	private JMenuItem miDeleteAllItem = new JMenuItem(Messages.getString("MainFrame.DeleteAll"));
 	private JMenuItem miChangeAmountPrice = new JMenuItem(Messages.getString("MainFrame.ChangeAmountPrice"));
 	private JMenuItem miMarkRefund = new JMenuItem(Messages.getString("MainFrame.MarkRefund"));
+	private JMenuItem miMarkAllRefund = new JMenuItem(Messages.getString("MainFrame.MarkAllRefund"));
 	private JMenuItem miCancelMarkRefund = new JMenuItem(Messages.getString("MainFrame.CancelMarkRefund"));
 //	private JMenuItem miChangeAmount = new JMenuItem(Messages.getString("MainFrame.ChangeAmount"));
 	
@@ -170,6 +171,7 @@ public class MainFrame extends JFrame implements ActionListener{
 //		popupMenu.add(miChangeAmount);
 		popupMenu.addSeparator();
 		popupMenu.add(miMarkRefund);
+		popupMenu.add(miMarkAllRefund);
 		popupMenu.add(miCancelMarkRefund);
 //		tableGoods.setComponentPopupMenu(popupMenu);
 		tableGoods.addMouseListener(new MouseAdapter(){
@@ -285,6 +287,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		btnClearMember.addActionListener(this);
 		miDeleteAllItem.addActionListener(this);
 		miMarkRefund.addActionListener(this);
+		miMarkAllRefund.addActionListener(this);
 		miCancelMarkRefund.addActionListener(this);
 		miDeleteItem.addActionListener(this);
 		miChangeAmountPrice.addActionListener(this);
@@ -703,7 +706,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		}else if (resultlist.size() == 1){
 			return resultlist.get(0);
 		} else {
-			SearchObjectListDialog dlg = new SearchObjectListDialog(this, resultlist, 1000, 800);
+			SearchObjectListDialog dlg = new SearchObjectListDialog(this, resultlist, WINDOW_WIDTH, WINDOW_HEIGHT);
 			dlg.setVisible(true);
 			return dlg.getChoosedGoods();
 		}
@@ -755,18 +758,23 @@ public class MainFrame extends JFrame implements ActionListener{
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnCheckout){
 			doCheckout();
+			tfSearchGoods.requestFocusInWindow();
 		} else if (e.getSource() == btnShiftWork){
 			doSwiftWork();
+			tfSearchGoods.requestFocusInWindow();
 		} else if (e.getSource() == btnOpenCashdrawer){
 			doOpenCashdrawer(true);
+			tfSearchGoods.requestFocusInWindow();
 		} 
 //		else if (e.getSource() == miChangeAmount){
 //			doChangeAmount();
 //		} 
-		else if (e.getSource() == btnPreOrder){
+		else if (e.getSource() == btnPreOrder){ 
 			doPreOrder();
+			tfSearchGoods.requestFocusInWindow();
 		} else if (e.getSource() == btnPreOrderMgr){
 			doPreOrderMgr();
+			tfSearchGoods.requestFocusInWindow();
 		} else if (e.getSource() == btnQueryMember){
 			doLookforMember();
 			tfSearchGoods.requestFocusInWindow();
@@ -780,25 +788,37 @@ public class MainFrame extends JFrame implements ActionListener{
 				mapMember.put(member.getMemberCard(), member);
 				calculatePrice();
 			}
+			tfSearchGoods.requestFocusInWindow();
 		} else if (e.getSource() == btnClearMember){
 			member = null;
 			showMemberInfo(null);
 			modelGoods.setMember(null);
 			calculatePrice();
+			tfSearchGoods.requestFocusInWindow();
 		} else if (e.getSource() == miDeleteItem){
 			doDeleteItem();
+			tfSearchGoods.requestFocusInWindow();
 		} else if (e.getSource() == miDeleteAllItem){
 			doDeleteAllItem();
+			tfSearchGoods.requestFocusInWindow();
 		} else if (e.getSource() == miChangeAmountPrice){
 			doChangePriceAmount();
+			tfSearchGoods.requestFocusInWindow();
 		} else if (e.getSource() == btnNoBarcodeItem){
 			showNoBarcodeItemSelectionDialog();
+			tfSearchGoods.requestFocusInWindow();
 		} else if (e.getSource() == miMarkRefund){
 			doMarkRefund();
+			tfSearchGoods.requestFocusInWindow();
+		} else if (e.getSource() == miMarkAllRefund){
+			doMarkAllRefund();
+			tfSearchGoods.requestFocusInWindow();
 		} else if (e.getSource() == miCancelMarkRefund){
 			doCancelMarkRefund();
+			tfSearchGoods.requestFocusInWindow();
 		} else if (e.getSource() == btnTodayIndent){
 			doQueryTodayIndent();
+			tfSearchGoods.requestFocusInWindow();
 		}
 	}
 	
@@ -818,6 +838,16 @@ public class MainFrame extends JFrame implements ActionListener{
 		ChoosedGoods cg = modelGoods.getObjectAt(tableGoods.getSelectedRow());
 		cg.amount = Math.abs(cg.amount) * (-1);//confirm this value keep negative
 		modelGoods.fireTableRowsUpdated(tableGoods.getSelectedRow(), tableGoods.getSelectedRow());
+		calculatePrice();
+	}
+	
+	private void doMarkAllRefund(){
+		for (int i = 0; i < modelGoods.getRowCount(); i++) {
+			ChoosedGoods cg = modelGoods.getObjectAt(i);
+			cg.amount = Math.abs(cg.amount) * (-1);//confirm this value keep negative
+		}
+		
+		modelGoods.fireTableRowsUpdated(0, modelGoods.getRowCount() - 1);
 		calculatePrice();
 	}
 	

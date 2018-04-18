@@ -65,7 +65,7 @@ public class GoodsTableModel extends DefaultTableModel{
 			return "";
 		case 5:
 			if (cg.modifiedPrice < 0) return "";
-			return cg.modifiedPrice;
+			return CommonTools.transferNumberByPM(cg.modifiedPrice, "");
 		}
 		return "";
 	}
@@ -137,7 +137,8 @@ public class GoodsTableModel extends DefaultTableModel{
 					if (cg.goods.getId() == goods.getId())
 						amount += cg.amount;
 				}
-				if (amount == promotions.get(i).getObjectAQuantity()){
+				if (amount == promotions.get(i).getObjectAQuantity()
+						&& goods.getId() == promotions.get(i).getObjectAId()){
 					return promotions.get(i);
 				}
 			} else if (promotions.get(i).getObjectAType() == ConstantValue.PROMOTION_CATEGORY2){
