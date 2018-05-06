@@ -634,7 +634,7 @@ public class MainFrame extends JFrame implements ActionListener{
 				+ Messages.getString("CheckoutDialog.MemberInfo.DiscountRate") + m.getDiscountRate() + ", "
 				+ Messages.getString("CheckoutDialog.MemberInfo.Score") + CommonTools.transferDouble2Scale(m.getScore()) + ", "
 				+ Messages.getString("CheckoutDialog.MemberInfo.Balance") + CommonTools.transferDouble2Scale(m.getBalanceMoney()) + ", "
-				+ "Tele " + m.getTelephone());
+				+ "Tel " + m.getTelephone());
 		}
 	}
 	
