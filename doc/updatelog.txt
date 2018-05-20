@@ -4,4 +4,6 @@
     3. goods promotion, if the promotion is set to a goods, must compare the goods id
     4. set the SearchObjectListDialog's height to the setting value.
     5. make the tfSearchGoods get focus after every operation.
-	
+
+20180521
+	1. use code to open cashdrawer

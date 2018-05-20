@@ -22,9 +22,13 @@ import java.awt.print.PageFormat;
 import java.awt.print.Printable;
 import java.awt.print.PrinterException;
 import java.awt.print.PrinterJob;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -94,6 +98,7 @@ public class MainFrame extends JFrame implements ActionListener{
 	public static int MEMBER_AMOUNT;
 	public static String portCashdrawer;
 	public static String printerName;
+	public static String printerIP;
 	public static String FONT_PRINTTICKET;
 	
 	private JLabel lbStatusLogin = new JLabel();
@@ -883,7 +888,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		dlg.setVisible(true);
 	}
 	
-	private void doOpenCashdrawer(boolean needpassword){
+	public void doOpenCashdrawer(boolean needpassword){
 		if (needpassword){
 			String code = JOptionPane.showInputDialog(this, Messages.getString("MainFrame.InputCodeOfOpenCashdrawer"));
 			if (code == null)
@@ -893,39 +898,28 @@ public class MainFrame extends JFrame implements ActionListener{
 				return;
 			}
 		}
-		
-		PrintService ps = null;
-		for(PrintService service : PrinterJob.lookupPrintServices()){
-			if (service.getName().equals(this.printerName)){
-				ps = service;
-				break;
-			}
-		}
-		if (ps == null){
-			JOptionPane.showMessageDialog(this, "Cannot drive printer by name : " + printerName);
-			return;
-		}
-		
-		PrinterJob pj = PrinterJob.getPrinterJob();
-		
-		pj.setPrintable(new Printable(){
-
-			@Override
-			public int print(Graphics graphics, PageFormat pageFormat, int pageIndex) throws PrinterException {
-				if (pageIndex > 0) {
-					return NO_SUCH_PAGE;
-				}
-				Graphics2D g2d = (Graphics2D) graphics;
-				g2d.drawString("", 0, 0);
-				
-				return PAGE_EXISTS;
-			}});
+		Socket socket = null;
+		OutputStream socketOut = null;
+		OutputStreamWriter writer = null;
 		try {
-			pj.setPrintService(ps);
-			pj.print();
-		} catch (PrinterException e) {
-			JOptionPane.showMessageDialog(this, "Cannot drive printer");
+			socket = new Socket(printerIP, 9100);//打印机默认端口是9100, 如果某些型号打印机不是这个, 单独配置
+			socket.setSoTimeout(1000);
+			socketOut = socket.getOutputStream();
+			writer = new OutputStreamWriter(socketOut, "GBK");
+			char[] c = {27, 'p', 0, 60, 240};
+			writer.write(c);
+			writer.flush();
+		} catch (IOException e) {
 			logger.error("", e);
+		} finally{
+			try {
+				if (socket != null)
+					socket.close();
+				if (socketOut != null)
+					socketOut.close();
+				if (writer != null)
+					writer.close();
+			} catch (IOException e) {}
 		}
 	}
 	
@@ -1109,6 +1103,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		MainFrame.GOODS_AMOUNT=Integer.parseInt(prop.getProperty("goods.amount"));
 		MainFrame.MEMBER_AMOUNT = Integer.parseInt(prop.getProperty("member.amount"));
 		MainFrame.printerName = prop.getProperty("printerName");
+		MainFrame.printerIP = prop.getProperty("printerIP");
 		MainFrame.FONT_PRINTTICKET = prop.getProperty("printFont");
 		final MainFrame f = new MainFrame();
 		f.setSize(MainFrame.WINDOW_WIDTH, MainFrame.WINDOW_HEIGHT);

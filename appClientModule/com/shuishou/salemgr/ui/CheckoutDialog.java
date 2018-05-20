@@ -469,6 +469,7 @@ public class CheckoutDialog extends CommonDialog{
 		//clean table data
 		mainFrame.clearTable();
 		CheckoutDialog.this.setVisible(false);
+		mainFrame.doOpenCashdrawer(false);
 	}
 	
 	private void doPrintTicket(Indent indent){

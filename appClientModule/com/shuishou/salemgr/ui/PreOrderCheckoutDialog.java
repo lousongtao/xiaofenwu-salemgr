@@ -394,6 +394,7 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 		//clean table data
 		mainFrame.clearTable();
 		PreOrderCheckoutDialog.this.setVisible(false);
+		mainFrame.doOpenCashdrawer(false);
 	}
 	
 	public void doEnterClick(){
