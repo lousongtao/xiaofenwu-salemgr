@@ -154,7 +154,7 @@ public class QueryTodayIndentDialog extends CommonDialog implements ActionListen
 		HttpResult<ArrayList<Indent>> result = gson.fromJson(response, new TypeToken<HttpResult<ArrayList<Indent>>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while query indent. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(this, "return false while query indent. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(this, result.result);
 			return;
 		}
 		listIndent = result.data;

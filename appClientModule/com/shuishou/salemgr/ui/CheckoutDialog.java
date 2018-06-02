@@ -422,7 +422,7 @@ public class CheckoutDialog extends CommonDialog{
 			HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
 			if (result == null || !result.success){
 				logger.error("return false while doing pay. URL = " + url + ", response = "+response);
-				JOptionPane.showMessageDialog(this, "return false while doing pay. URL = " + url + ", response = "+response);
+				JOptionPane.showMessageDialog(this, result.result);
 				return;
 			}
 			if (indent == null){
@@ -452,7 +452,7 @@ public class CheckoutDialog extends CommonDialog{
 			HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
 			if (result == null || !result.success){
 				logger.error("return false while doing refund. URL = " + url + ", response = "+response);
-				JOptionPane.showMessageDialog(this, "return false while doing refund. URL = " + url + ", response = "+response);
+				JOptionPane.showMessageDialog(this, result.result);
 				return;
 			}
 			if (indent == null){

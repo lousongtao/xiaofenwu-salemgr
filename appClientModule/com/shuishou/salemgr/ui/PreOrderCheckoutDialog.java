@@ -386,7 +386,7 @@ public class PreOrderCheckoutDialog extends CommonDialog{
 		HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while doing pay. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(this, "return false while doing pay. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(this, result.result);
 			return;
 		}
 		//print ticket

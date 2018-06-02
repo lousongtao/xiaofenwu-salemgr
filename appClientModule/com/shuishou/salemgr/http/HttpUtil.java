@@ -168,7 +168,7 @@ public class HttpUtil {
 		HttpResult<ArrayList<Category1>> result = new Gson().fromJson(response, new TypeToken<HttpResult<ArrayList<Category1>>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while loading goods. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while loading goods. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		return result.data;
@@ -186,7 +186,7 @@ public class HttpUtil {
 		HttpResult<ArrayList<Member>> result = gson.fromJson(response, new TypeToken<HttpResult<ArrayList<Member>>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while loading member. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while loading member. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		return result.data;
@@ -206,7 +206,7 @@ public class HttpUtil {
 		HttpResult<Goods> result = gson.fromJson(response, new TypeToken<HttpResult<Goods>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while loading goods by barcode " + barcode + ". URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while loading goods by barcode " + barcode + ". URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		return result.data;
@@ -223,7 +223,7 @@ public class HttpUtil {
 		HttpResult<HashMap<String, String>> result = new Gson().fromJson(response, new TypeToken<HttpResult<HashMap<String, String>>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while loading configs. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while loading configs. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		return result.data;	
@@ -240,7 +240,7 @@ public class HttpUtil {
 		HttpResult<CurrentDutyInfo> result = new Gson().fromJson(response, new TypeToken<HttpResult<CurrentDutyInfo>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while get duty employee info. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while get duty employee info. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		return result.data;
@@ -257,7 +257,7 @@ public class HttpUtil {
 		HttpResult<ArrayList<DiscountTemplate>> result = new Gson().fromJson(response, new TypeToken<HttpResult<ArrayList<DiscountTemplate>>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while get discount templates. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while get discount templates. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		return result.data;
@@ -274,7 +274,7 @@ public class HttpUtil {
 		HttpResult<ArrayList<Promotion>> result = new Gson().fromJson(response, new TypeToken<HttpResult<ArrayList<Promotion>>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while get promotion. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while get promotion. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		return result.data;
@@ -291,7 +291,7 @@ public class HttpUtil {
 		HttpResult<ArrayList<PayWay>> result = new Gson().fromJson(response, new TypeToken<HttpResult<ArrayList<PayWay>>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while get pay way. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while get pay way. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		return result.data;
@@ -311,7 +311,7 @@ public class HttpUtil {
 		HttpResult<CurrentDutyInfo> result = new Gson().fromJson(response, new TypeToken<HttpResult<CurrentDutyInfo>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while starting shiftwork. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while starting shiftwork. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		return result.data;
@@ -332,7 +332,7 @@ public class HttpUtil {
 		HttpResult<CurrentDutyInfo> result = new Gson().fromJson(response, new TypeToken<HttpResult<CurrentDutyInfo>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while end shiftwork. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while end shiftwork. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		return result.data;
@@ -360,7 +360,7 @@ public class HttpUtil {
 		HttpResult<ArrayList<Indent>> result = gson.fromJson(response, new TypeToken<HttpResult<ArrayList<Indent>>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while query preorder. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while query preorder. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		return result.data;
@@ -381,7 +381,7 @@ public class HttpUtil {
 		HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while change preorder to order. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while change preorder to order. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		return result.data;
@@ -402,7 +402,7 @@ public class HttpUtil {
 		HttpResult<Indent> result = gson.fromJson(response, new TypeToken<HttpResult<Indent>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while delete preorder. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while delete preorder. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return false;
 		}
 		return true;
@@ -423,7 +423,7 @@ public class HttpUtil {
 		HttpResult<ArrayList<Member>> result = gson.fromJson(response, new TypeToken<HttpResult<ArrayList<Member>>>(){}.getType());
 		if (!result.success){
 			logger.error("return false while query member by membercard. URL = " + url + ", response = "+response);
-			JOptionPane.showMessageDialog(parent, "return false while query member by membercard. URL = " + url + ", response = "+response);
+			JOptionPane.showMessageDialog(parent, result.result);
 			return null;
 		}
 		if (result.data != null && !result.data.isEmpty())
