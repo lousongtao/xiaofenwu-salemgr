@@ -7,3 +7,6 @@
 
 20180521
 	1. use code to open cashdrawer
+	
+20180617
+	1. add log to track exception in print thread
