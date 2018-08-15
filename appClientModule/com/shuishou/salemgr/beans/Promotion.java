@@ -40,6 +40,8 @@ public class Promotion {
 	 * 2.	当reward_type为折扣金额时, 这是个百分比值
 	 */
 	private double rewardValue;
+	
+	private boolean available = true;
 
 	public int getId() {
 		return id;
@@ -119,6 +121,14 @@ public class Promotion {
 
 	public void setRewardValue(double rewardValue) {
 		this.rewardValue = rewardValue;
+	}
+
+	public boolean isAvailable() {
+		return available;
+	}
+
+	public void setAvailable(boolean available) {
+		this.available = available;
 	}
 
 	@Override

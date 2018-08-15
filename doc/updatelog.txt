@@ -10,3 +10,6 @@
 	
 20180617
 	1. add log to track exception in print thread
+	
+20180815
+	1. extend promotion function

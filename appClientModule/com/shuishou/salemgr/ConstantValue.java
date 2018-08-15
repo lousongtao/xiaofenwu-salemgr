@@ -123,6 +123,10 @@ public class ConstantValue {
 	public static final int PROMOTION_REWARD_BUYNDISCOUNT = 2; //买n个, 给予百分比折扣
 	public static final int PROMOTION_REWARD_BUYNNEXTREDUCEPRICE = 3; //买n个, 下一个直接折扣x元
 	public static final int PROMOTION_REWARD_BUYNNEXTDISCOUNT = 4; //买n个, 下一个给予百分比折扣
+	public static final int PROMOTION_REWARD_BUYNA_NEXTBREDUCEPRICE = 5; //买n个A, 下一个B给予直接折扣
+	public static final int PROMOTION_REWARD_BUYNA_NEXTBDISCOUNT = 6; //买n个A, 下一个B给予百分比折扣
+	public static final int PROMOTION_REWARD_BUYNA_MB_ABDISCOUNT = 7; //买n个A + m个B, AB同时给予直接折扣
+	public static final int PROMOTION_REWARD_BUYNA_MB_ABREDUCEPRICE = 8; //买n个A + m个B, AB同时给予百分比折扣
 	
 	public static final int DISCOUNTTYPE_RATE= 1;     //折扣类型-按比例折扣
 	public static final int DISCOUNTTYPE_QUANTITY = 2;//折扣类型-直接减数量

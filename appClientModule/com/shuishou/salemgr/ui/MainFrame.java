@@ -186,9 +186,16 @@ public class MainFrame extends JFrame implements ActionListener{
                     int row = source.rowAtPoint( e.getPoint() );
                     int column = source.columnAtPoint( e.getPoint() );
 
-                    if (! source.isRowSelected(row))
+                    if (! source.isRowSelected(row)){
                         source.changeSelection(row, column, false, false);
-
+                    }
+                    //除了删除全部项, 其他的弹出式菜单不可应用于促销状况下的商品
+                    ChoosedGoods cg = modelGoods.getData().get(row);
+                    miDeleteItem.setEnabled(cg.promotion == null);
+                    miChangeAmountPrice.setEnabled(cg.promotion == null);
+                    miMarkRefund.setEnabled(cg.promotion == null);
+                    miMarkAllRefund.setEnabled(cg.promotion == null);
+                    miCancelMarkRefund.setEnabled(cg.promotion == null);
                     popupMenu.show(e.getComponent(), e.getX(), e.getY());
                 }
             }
@@ -209,7 +216,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		Insets insets = new Insets(5,5,5,5);
 		
 		JPanel pMember = new JPanel(new GridBagLayout());
-		pMember.setBorder(BorderFactory.createLineBorder(Color.gray));
+		pMember.setBorder(BorderFactory.createLineBorder(new Color(187, 79, 32)));
 		JLabel lbMember = new JLabel(Messages.getString("MainFrame.Member")+"[F4]");
 		tfMember.setPreferredSize(new Dimension(180, 35));
 		tfMember.setMinimumSize(new Dimension(180, 35));
@@ -225,7 +232,7 @@ public class MainFrame extends JFrame implements ActionListener{
 		btnCheckout.setMaximumSize(new Dimension(200, 70));
 		btnCheckout.setMinimumSize(new Dimension(200, 70));
 		JPanel pCheckout = new JPanel(new GridBagLayout());
-		pCheckout.setBorder(BorderFactory.createLineBorder(Color.gray));
+		pCheckout.setBorder(BorderFactory.createLineBorder(new Color(115, 164, 55)));
 		pCheckout.add(lbGoodsAmount, new GridBagConstraints(0, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.NONE, insets,0,0));
 		pCheckout.add(lbGoodsOriginPrice, new GridBagConstraints(1, 0, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.NONE, insets,0,0));
 		pCheckout.add(lbGoodsPrice,  new GridBagConstraints(0, 1, 1, 1,1,1, GridBagConstraints.WEST, GridBagConstraints.NONE, insets,0,0));
@@ -738,14 +745,31 @@ public class MainFrame extends JFrame implements ActionListener{
 			originPrice += cg.amount * cg.goods.getSellPrice();
 			/**
 			 * if modifiedPrice >= 0, then use the modifiedPrice;
-			 * else if member != null, then use the member discount price;
+			 * else if member != null, then use the member discount price; need to check if this item in promotion
 			 * else use the goods.sellPrice.
 			 */
 			if (cg.modifiedPrice >= 0)
 				price += cg.modifiedPrice * cg.amount;
-			else if (member != null)
-				price += cg.goods.getSellPrice() * member.getDiscountRate() * cg.amount;
-			else 
+			else if (member != null){
+				if (cg.promotion == null)
+					price += cg.goods.getSellPrice() * member.getDiscountRate() * cg.amount;
+				else {
+					if (cg.promotion.isForbidMemberDiscount()){
+						if (cg.modifiedPrice >= 0){
+							//user cg.modifiedPrice here
+							price += cg.modifiedPrice * cg.amount;
+						} else {
+							price += cg.goods.getSellPrice() * cg.amount;
+						}
+					} else {
+						if (cg.modifiedPrice >= 0){
+							price += cg.modifiedPrice * cg.amount * member.getDiscountRate();
+						} else {
+							price += cg.goods.getSellPrice() * cg.amount * member.getDiscountRate();
+						}
+					}
+				}
+			} else 
 				price += cg.goods.getSellPrice() * cg.amount;
 		}
 		lbGoodsAmount.setText(Messages.getString("MainFrame.lbIndentInfo.itemamount") + itemamount);
@@ -1153,6 +1177,7 @@ public class MainFrame extends JFrame implements ActionListener{
 	
 	class GoodsTableCellRenderer extends DefaultTableCellRenderer{
 		private Color txtColor = new Color(151, 151, 151);
+		private Color darkGreen = new Color(0, 247, 123);
 		@Override
 	    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
 	    {
@@ -1168,6 +1193,9 @@ public class MainFrame extends JFrame implements ActionListener{
 		        	c.setBackground(Color.lightGray);
 		        else 
 		        	c.setBackground(Color.white);
+		        if (cg.promotion != null){
+		        	c.setBackground(darkGreen);
+		        }
 	        }
 	        return c;
 	    }
