@@ -89,19 +89,7 @@ public class CheckoutDialog extends CommonDialog{
 		this.mainFrame = mainFrame;
 		this.choosedGoods = choosedGoods;
 		this.member = m;
-		for(ChoosedGoods cg : choosedGoods){
-			/**
-			 * if modifiedPrice >= 0, then use the modifiedPrice;
-			 * else if member != null, then use the member discount price;
-			 * else use the goods.sellPrice.
-			 */
-			if (cg.modifiedPrice >= 0)
-				sellPrice += cg.modifiedPrice * cg.amount;
-			else if (member != null)
-				sellPrice += cg.goods.getSellPrice() * member.getDiscountRate() * cg.amount;
-			else 
-				sellPrice += cg.goods.getSellPrice() * cg.amount;
-		}
+		sellPrice = CommonTools.getGoodsDiscountPrice(choosedGoods, m);
 		discountPrice = sellPrice;
 		initUI();
 	}
@@ -133,7 +121,7 @@ public class CheckoutDialog extends CommonDialog{
 				if (i > 0){
 					pp.setPreSiblingPaywayPanel(listPaywayPanel.get(i-1));
 				}
-				pPayway.add(pp, new GridBagConstraints(0, i, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(10, 0, 0, 0), 0, 0));
+				pPayway.add(pp, new GridBagConstraints(0, i, 1, 1, 1, 1, GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(5, 0, 0, 0), 0, 0));
 			}
 			
 		}

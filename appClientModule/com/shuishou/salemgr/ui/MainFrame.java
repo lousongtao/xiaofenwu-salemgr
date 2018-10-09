@@ -737,47 +737,15 @@ public class MainFrame extends JFrame implements ActionListener{
 			lbGoodsPrice.setText("");
 			return;
 		}
-		double price = 0;
-		double originPrice = 0;
+		double price = CommonTools.getGoodsDiscountPrice(modelGoods.getData(), member);
+		double originPrice = CommonTools.getGoodsOriginPrice(modelGoods.getData());
 		int itemamount = 0;
 		for(ChoosedGoods cg : modelGoods.getData()){
 			itemamount += Math.abs(cg.amount); //sometimes the refund goods make the amount negative
-			originPrice += cg.amount * cg.goods.getSellPrice();
-			/**
-			 * if modifiedPrice >= 0, then use the modifiedPrice;
-			 * else if member != null, then use the member discount price; need to check if this item in promotion
-			 * else use the goods.sellPrice.
-			 */
-			if (cg.modifiedPrice >= 0)
-				price += cg.modifiedPrice * cg.amount;
-			else if (member != null){
-				if (cg.promotion == null)
-					price += cg.goods.getSellPrice() * member.getDiscountRate() * cg.amount;
-				else {
-					if (cg.promotion.isForbidMemberDiscount()){
-						if (cg.modifiedPrice >= 0){
-							//user cg.modifiedPrice here
-							price += cg.modifiedPrice * cg.amount;
-						} else {
-							price += cg.goods.getSellPrice() * cg.amount;
-						}
-					} else {
-						if (cg.modifiedPrice >= 0){
-							price += cg.modifiedPrice * cg.amount * member.getDiscountRate();
-						} else {
-							price += cg.goods.getSellPrice() * cg.amount * member.getDiscountRate();
-						}
-					}
-				}
-			} else 
-				price += cg.goods.getSellPrice() * cg.amount;
 		}
 		lbGoodsAmount.setText(Messages.getString("MainFrame.lbIndentInfo.itemamount") + itemamount);
 		lbGoodsPrice.setText(Messages.getString("MainFrame.lbIndentInfo.price") + CommonTools.transferNumberByPM(price, ""));
 		lbGoodsOriginPrice.setText(Messages.getString("MainFrame.lbIndentInfo.OriginPrice") + CommonTools.transferNumberByPM(originPrice, ""));
-//		lbIndentInfo.setText(Messages.getString("MainFrame.lbIndentInfo.typeamount") + modelGoods.getRowCount()+ "  "
-//				+ Messages.getString("MainFrame.lbIndentInfo.itemamount") + itemamount + "  "
-//				+ Messages.getString("MainFrame.lbIndentInfo.price") + CommonTools.transferNumberByPM(price, ""));
 	}
 	
 	public void putFocusOnTFBarcode(){
